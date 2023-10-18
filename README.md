@@ -6,6 +6,7 @@ To do so, it leverages the functionalities of [AutoHotkey](https://github.com/Au
 
 ## Running the script
 Just copy the repository and unzip, and open the SAPO.ahk file with the included AutoHotkey executable (either by dragging it on top of the executable, or by context menu "open with"). No installation required.
+Some information about the antibodies or equipment used in your lab can be entered in "lab-variables.ini"
 
 ## How to use
 After running the script, just type the hotkey or hotstring in the application of your choice.
