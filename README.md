@@ -1,2 +1,2 @@
 # SAPO
-**S**tructured reporting voor **APO** - Dutch implementation in AutoHotkey
+**S**tructured reporting voor **APO** - Flemish implementation in AutoHotkey
