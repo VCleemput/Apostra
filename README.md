@@ -18,7 +18,3 @@ At the moment, the script contains the following hotkeys
 
 ## Contribution
 If you'd like to contribute in any way or have suggestions for improvements (both code-wise or regarding the content), just start an issue or open a pull request.
-
-## Disclaimer
-This code is supplied as-is. You yourself remain responsible for the reports you produce.
-
