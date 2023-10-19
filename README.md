@@ -13,7 +13,8 @@ After running the script, just type the hotkey or hotstring in the application o
 ### Currently implemented
 At the moment, the script contains the following hotkeys
 - *69pb : breast punction core needle biopsy
-- *qs: "Quickscore": hormone-receptors, HER2 and ki67. After generating the text, Windows+s optionally pastes the "short version".
+- *qs: "quickscore": hormone-receptors, HER2 and ki67. After generating the text, Windows+s optionally pastes the "short version".
+- *88: melanoma
 - windows+b: backup: pastes the previous text again if something went wrong
 
 ## Contribution
