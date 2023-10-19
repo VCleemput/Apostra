@@ -52,9 +52,9 @@ return
 
 ::*qs::
 {	;ER, PR, HER2 and ki67
-	aw := WinExist("A")
+	aw := WinExist("A") ; captures the current window, so at the end the text is pasted in the same window
 	global synopsis ; a value to store the synopsis, to be passed to the next function
-	MyGui := Gui(, "Farmacodiagnostiek borst")
+	MyGui := Gui(, "Farmacodiagnostiek borst") ; create GUI
 	ERCheck := MyGui.AddCheckbox("xm vReceptorER Checked", "ER")
 	ERCheck.OnEvent("Click", ER)
 	ERpctTekst := MyGui.AddText("xm section vtekstER", "Percentage gekleurde kernen")
@@ -80,7 +80,7 @@ return
 	MyGui.AddButton("xm default", "OK").OnEvent("Click", _qsButtonOK)
 	MyGui.Show()
 
-ER(*)
+ER(*) ; Do this when ER is checked
 {
 	if ERCheck.value = 1
 		{
@@ -385,5 +385,89 @@ _69pbButtonOK(*){
 	SendHTML(html, aw)
 	MyGUI.Destroy()
 	return
+}
+}
+
+::*88::
+{	;Melanoom
+	aw := WinExist("A")
+	MyGui := Gui(, "Melanoom")
+	MyGui.AddText("xm section w100", "Locatie")
+	locatie := MyGui.AddEdit("ys w400", "")
+	MyGui.AddText("xm section w100", "Type")
+	typeMM := MyGui.AddComboBox("ys w400 Choose1", ["superficieel spreidend maligne melanoom","lentigo maligne melanoma","acrolentigineus maligne melanoom"])
+	MyGui.AddText("xm section w100", "groeifase")
+	groeifase := MyGui.AddDDL("ys w400 choose1", ["zuivere radiale","invasieve radiale","invasieve verticale","invasieve horizontale"])
+	MyGui.AddText("xm section w100", "Clark Level")
+	clarkLevel := MyGui.AddDDL("ys w400 choose1", ["I = melanoma in situ", "II = melanoma aanwezig in papillaire dermis, maar geen opvullen of expansie van papillaire dermis", " III = melanoma aanwezig in papillaire dermis met opvullen en expansie van papillaire dermis", "IV = melanoma invadeert reticulaire dermis", "V = melanoma invadeert subcutis"])
+	MyGui.AddText("xm section w100", "Breslow (mm)")
+	breslow := MyGui.AddEdit("ys w400", "")
+	MyGui.AddText("xm section w100", "LVI")
+	lvi := MyGui.AddCheckbox("ys w400", "")
+	MyGui.AddText("xm section w100", "PNI")
+	pni := MyGui.AddCheckbox("ys w400", "")
+	MyGui.AddText("xm section w100", "Ulceratie")
+	ulceratie := MyGui.AddCheckbox("ys w400", "")
+	MyGui.AddText("xm section w100", "mitosen per mm²")
+	mitosenPerMm2 := MyGui.AddEdit("ys w400", "")
+	MyGui.AddText("xm section w100", "Stromale afweer")
+	stromaleAfweer := MyGui.AddComboBox("ys w400 Choose1", ["niet aantoonbaar","aanwezig, non-brisk","aanwezig, brisk"])
+	MyGui.AddText("xm section w100", "Regressie")
+	regressie := MyGui.AddCheckbox("ys w400", "")
+	MyGui.AddText("xm section w100", "Satellietletsels")
+	satellietletsel := MyGui.AddCheckbox("ys w400", "")
+	MyGui.AddText("xm section w100", "Voorafbestaande naevus")
+	voorafbestaandeNaevus := MyGui.AddCheckbox("ys w400", "")
+	MyGui.AddText("xm section w100", "Snederanden")
+	snederanden := MyGui.AddEdit("ys w400", "In toto verwijderd")
+	MyGui.AddText("xm section w100", "Andere letsels")
+	andereLetsels := MyGui.AddEdit("ys w400", "Geen")
+	MyGui.AddText("xm section w100", "TNM")
+	tnm := MyGui.AddEdit("ys w400", "pT1a")
+	MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _88ButtonOK)
+	MyGui.Show()
+
+
+_88ButtonOK(*)
+{
+	RegExMatch(clarkLevel.text, "[IV]*", &clark)
+	clark := clark[]
+	bin := Map(0, "niet aantoonbaar", 1, "aanwezig")
+	lvi := bin[lvi.value]
+	pni := bin[pni.value]
+	ulceratie := bin[ulceratie.value]
+	satellietletsel := bin[satellietletsel.value]
+	voorafbestaandeNaevus := bin[voorafbestaandeNaevus.value]
+	regressie := bin[regressie.value]
+
+	html := 
+	(
+	"<b>Microscopie:</b><br>"
+	"- Histologisch tumortype (WHO) : " typeMM.text "<br>"
+	"- Groeifase : " groeifase.text " groeifase<br>"
+	"- Clark level : " clarkLevel.text "<br>"
+	"- Breslow-dikte : " breslow.text "mm<br>"
+	"- Lymfovasculaire invasie : " lvi "<br>"
+	"- Perineurale invasie : " pni "<br>"
+	"- Ulceratie : " ulceratie "<br>"
+	"- Mitosen : " mitosenPerMm2.text " mitosen per mm²<br>"
+	"- Stromale afweerreactie : " stromaleAfweer.text "<br>"
+	"- Regressie : " regressie "<br>"
+	"- Satellietletsels : " satellietletsel "<br>"
+	"- Voorafbestaande naevus : " voorafbestaandeNaevus "<br>"
+	"- Snijranden : " snederanden.text "<br>"
+	"- Andere letsels : " andereLetsels.text "<br>"
+	"<br>"
+	"<b>Besluit:</b><br>"
+	"Huidexcisie " locatie.text "<br>"
+	"- " typeMM.text " in " groeifase.text " groeifase <br>"
+	"- Clark level " clark "<br>"
+	"- Breslow-dikte " breslow.text " mm<br>"
+	"- Ulceratie: " ulceratie "<br>"
+	"- " snederanden.text "<br><br>"
+	"- Voorstel stadiëring (8e ed. TNM): " tnm.text "<br>"
+	)
+	SendHTML(html, aw)
+	MyGui.Destroy()
 }
 }
