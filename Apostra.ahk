@@ -1,6 +1,7 @@
 #Requires AutoHotkey v2.0
 #Include WinClipAPI.ahk ;includes clipboard functionality
 #Include WinClip.ahk
+#SingleInstance
 
 ; define a global variable to drop the generated text to, in case something goes wrong
 global backup
@@ -495,15 +496,15 @@ IniListRead(path, section, key)
 _PDL1ButtonOK(*)
 {
 	html := "<b><u>Resultaat PD-L1 IHC analyse</u></b><br>"
-	html .=	"Techniek: uitgevoerd met " . techniek.text . " op " . toestel.text . ".<br>"
-	html .= "<b>Interpretatie:</b><br>"
+	html .=	"<b>Techniek: </b>uitgevoerd met " . techniek.text . " op " . toestel.text . ".<br>"
+	html .= "<b>Interpretatie: </b>"
 	if interpretatie.text = "CPS"
 		html .= "Combined positivity score (CPS): het aantal PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score).<br>"
 	if interpretatie.text = "TPS"
 		html .= "Tumour Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage).<br>"
 	if interpretatie.text = "IC"
 		html .= "Immune cell area (IC): gebied Ingenomen door het PD-L1 aankleurende immuuncellen gedeeld door het totale tumorgebied (= percentage).<br>"
-	html.= "<b>Besluit:</b><br>"
+	html.= "<b>Besluit: </b>"
 	html .= "PD-L1 (" . techniek.text . "): " . interpretatie.text . " = " . score.text
 	if interpretatie.text != "CPS"
 		html .= "%"
