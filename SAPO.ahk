@@ -471,3 +471,60 @@ _88ButtonOK(*)
 	MyGui.Destroy()
 }
 }
+
+IniListRead(path, section, key)
+{
+	return StrSplit(IniRead(path, section, key), ";")
+}
+::*pd::
+{	;PD-L1
+	aw := WinActive("A")
+	MyGui := Gui(,"PD-L1")
+	techniek_tekst := MyGui.AddText("xm section w200", "Techniek")
+	techniek := MyGui.AddCombobox("ys w200 Choose1", IniListRead("lab-variables.ini", "PD-L1", "techniek"))
+	toestel_tekst := MyGui.AddText("xm section w200", "Toestel")
+	toestel := MyGui.AddCombobox("ys w200 Choose1", IniListRead("lab-variables.ini", "PD-L1", "toestel"))
+	;drug_tekst := MyGui.AddText("xm section w200", "drug")
+	;drug := MyGui.AddCombobox("ys w200", IniListRead("lab-variables.ini", "PD-L1", "drug"))
+	interpretatie_tekst := MyGui.AddText("xm section w200", "Interpretatie")
+	interpretatie := MyGui.AddDDL("ys w200 Choose1", ["CPS", "TPS", "IC"])
+	;cutoff_tekst := MyGui.AddText("xm section w200", "cutoff")
+	;cutoff := MyGui.AddEdit("ys w200", "")
+	;controles_tekst := MyGui.AddText("xm section w200", "controles geslaagd")
+	;controles := MyGui.AddCheckbox("ys w200 Checked", "")
+	;geschikt_tekst := MyGui.AddText("xm section w200", "geschikt voor evaluatie")
+	;geschikt := MyGui.AddCheckbox("ys w200 Checked", "")
+	;MAT_tekst := MyGui.AddText("xm section w200", "membranaire aankleuring tumorcellen")
+	;MAT := MyGui.AddDDL("ys w200 Choose2", ["geen", "geringe", "uitgebreide"])
+	;MAI_tekst := MyGui.AddText("xm section w200", "aankleuring immuuncellen")
+	;MAI := MyGui.AddDDL("ys w200 Choose2", ["geen", "geringe", "uitgebreide"])
+	;TAI_tekst := MyGui.AddText("xm section w200", "type aankleuring immuuncellen")
+	;TAI := MyGui.AddDDL("ys w200 Choose1", ["membranaire en cytoplasmatische", "membranaire", "cytoplasmatisch"])
+	score_tekst := MyGui.AddText("xm section w200", interpretatie.text . "-score")
+	score := MyGui.AddEdit("ys w200", )
+	interpretatie.OnEvent("change", (*) => (score_tekst.text := interpretatie.text . "-score"))
+	;resultaat_tekst := MyGui.AddText("xm section w200", "Resultaat")
+	;resultaat := MyGui.AddDDL("ys w200", ["positief", "negatief"])
+	MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
+	MyGui.Show("AutoSize")
+
+_PDL1ButtonOK(*)
+{
+	html := "<b><u>Resultaat PD-L1 IHC analyse</u></b><br>"
+	html .=	"Techniek: uitgevoerd met " . techniek.text . " op " . toestel.text . ".<br>"
+	html .= "<b>Interpretatie:</b><br>"
+	if interpretatie.text = "CPS"
+		html .= "Combined positivity score (CPS): het aantal PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score).<br>"
+	if interpretatie.text = "TPS"
+		html .= "Tumour Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage).<br>"
+	if interpretatie.text = "IC"
+		html .= "Immune cell area (IC): gebied Ingenomen door het PD-L1 aankleurende immuuncellen gedeeld door het totale tumorgebied (= percentage).<br>"
+	html.= "<b>Besluit:</b><br>"
+	html .= "PD-L1 (" . techniek.text . "): " . interpretatie.text . " = " . score.text
+	if interpretatie.text != "CPS"
+		html .= "%"
+	html.= ".<br>"
+	SendHTML(html, aw)
+	MyGui.Destroy()
+}
+}
