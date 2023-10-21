@@ -12,10 +12,12 @@ Some information about the antibodies or equipment used in your lab can be enter
 After running the script, just type the hotkey or hotstring in the application of your choice.
 ### Currently implemented
 At the moment, the script contains the following hotkeys
+- windows+b: backup: pastes the previous text again if something went wrong
 - *69pb : breast punction core needle biopsy
 - *qs: "quickscore": hormone-receptors, HER2 and ki67. After generating the text, Windows+s optionally pastes the "short version".
 - *88: melanoma
-- windows+b: backup: pastes the previous text again if something went wrong
+- *pd: proposition PD-L1 reporting according to the minimal requirements of the cancer registry. Fill in your lab-specifica parameters in the lab-variables.ini-file.
+
 
 ## Contribution
 If you'd like to contribute in any way or have suggestions for improvements (both code-wise or regarding the content), just start an issue or open a pull request.
