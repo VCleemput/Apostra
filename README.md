@@ -1,5 +1,5 @@
-# SAPO
-**S**tructured reporting voor **APO** - Flemish implementation in AutoHotkey
+# Apostra
+**APO** ge**ST**ructureerde **RA**pporten - Flemish implementation in AutoHotkey
 ## Introduction
 This repository aims to provide an easy approach to roll out structured reporting in the context of pathological anatomy in nearly any environment that accepts copy-paste commands.
 To do so, it leverages the functionalities of [AutoHotkey](https://github.com/AutoHotkey/AutoHotkey) in order to show easy to navigate GUI's that fill in and paste templates. Where available, these templates aim to follow the directives of the Belgian Society for Pathology.
@@ -16,7 +16,7 @@ At the moment, the script contains the following hotkeys
 - *69pb : breast punction core needle biopsy
 - *qs: "quickscore": hormone-receptors, HER2 and ki67. After generating the text, Windows+s optionally pastes the "short version".
 - *88: melanoma
-- *41: Colonresectie
+- *41: colonresectie
 - *pd: proposition PD-L1 reporting according to the minimal requirements of the cancer registry. Fill in your lab-specifica parameters in the lab-variables.ini-file.
 
 
