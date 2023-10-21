@@ -16,6 +16,7 @@ At the moment, the script contains the following hotkeys
 - *69pb : breast punction core needle biopsy
 - *qs: "quickscore": hormone-receptors, HER2 and ki67. After generating the text, Windows+s optionally pastes the "short version".
 - *88: melanoma
+- *41: Colonresectie
 - *pd: proposition PD-L1 reporting according to the minimal requirements of the cancer registry. Fill in your lab-specifica parameters in the lab-variables.ini-file.
 
 
