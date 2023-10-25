@@ -483,10 +483,10 @@ IniListRead(path, section, key)
     MyGui := Gui(, "PDL1")
     Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
     Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Cervix"])
-    ScoreText := MyGui.AddText("xm section w200", "Score:")
-    ScoreEdit := MyGui.AddEdit("ys w200")
     ScoreType := MyGui.AddText("xm section w200", "Score Type:")
     ScoreTypeDropdown := MyGui.AddDropDownList("ys w200", ["TPS", "CPS"])
+    ScoreText := MyGui.AddText("xm section w200", "Score:")
+    ScoreEdit := MyGui.AddEdit("ys w200")
     ExternalControlsText := MyGui.AddText("xm section w200", "Externe/interne controles:")
     ExternalControlsCheckbox := MyGui.AddCheckbox("xm section w200", "Controles OK")
 
@@ -513,11 +513,14 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
         case "Blaas":
             cpsThreshold := 10  ; Threshold for CPS for Blaas
             tpsThreshold := 1  ; Threshold for TPS for Blaas
-            cpsInterpretatie := "Combined positivity score (CPS): The number of PD-L1 staining cells (tumor cells and immune cells) divided by the total number of viable tumor cells multiplied by 100 (= score). For treatment with Pembrolizumab, the cutoff value is > or = 10."
-            tpsInterpretatie := "Tumor Proportion Score (TPS): The number of PD-L1 staining tumor cells divided by the total number of viable tumor cells (= percentage). For treatment with Nivolumab, the cutoff value is > or = 1%."
+            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score).
+Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."
+            tpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage).
+Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 1%."
         case "Cervix":
             cpsThreshold := 1  ; Threshold for CPS for Cervix
-            cpsInterpretatie := "Combined positivity score (CPS): The number of PD-L1 staining cells (tumor cells and immune cells) divided by the total number of viable tumor cells multiplied by 100 (= score). For treatment with Pembrolizumab, the cutoff value is > or = 1."
+            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score).
+Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1."
     }
 
     ; Check if the entered score is a number
@@ -527,18 +530,18 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
         ; Check if CPS is positive
         if (scoreType = "CPS") {
             if (enteredScore >= cpsThreshold) {
-                result := "CPS is positive"
+                resultaat := "CPS is positief"
             } else {
-                result := "CPS is negative"
+                resultaat := "CPS is negatief"
             }
             explanation := cpsInterpretatie
         }
         ; Check if TPS is positive
         else if (scoreType = "TPS") {
             if (enteredScore >= tpsThreshold) {
-                result := "TPS is positive"
+                resultaat := "TPS is positief"
             } else {
-                result := "TPS is negative"
+                resultaat := "TPS is negatief"
             }
             explanation := tpsInterpretatie
         }
@@ -557,8 +560,8 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
         html .= "<b>Score Type:</b> " scoreType "<br>"
         html .= "<b>Interpretatie:</b> " explanation "<br>"
         html .= "<b>Externe/interne controle:</b> " externalControlsStatus "<br>"
-        html .= "<b>Score:</b> " enteredScore "<br>"
-        html .= "<b>Result:</b> " result "<br>"
+        html .= "<b>PD-L1 Score (22C3, Agilent):</b> " scoreType " "=" " enteredScore "<br>"
+        html .= "<b>Resultaat:</b> " result "<br>"
 		return html
     } else {
         return "Invalid score. Please enter a number."
