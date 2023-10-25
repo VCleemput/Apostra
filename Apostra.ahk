@@ -560,7 +560,7 @@ Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1."
         html .= "<b>Score Type:</b> " scoreType "<br>"
         html .= "<b>Interpretatie:</b> " explanation "<br>"
         html .= "<b>Externe/interne controle:</b> " externalControlsStatus "<br>"
-        html .= "<b>PD-L1 Score (22C3, Agilent):</b> " scoreType " "=" " enteredScore "<br>"
+        html .= "<b>PD-L1 Score (22C3, Agilent):</b> " scoreType " " enteredScore "<br>"
         html .= "<b>Resultaat:</b> " result "<br>"
 		return html
     } else {
