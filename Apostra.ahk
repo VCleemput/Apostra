@@ -480,7 +480,7 @@ IniListRead(path, section, key)
 ::*pdl1::
 {
     aw := WinExist("A")
-    MyGui := Gui(, "PDL1")
+    MyGui := Gui("PDL1")
     Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
     Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Cervix"])
     ScoreText := MyGui.AddText("xm section w200", "Score:")
@@ -524,11 +524,11 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
         case "Blaas":
             cpsThreshold := 10  ; Threshold for CPS for Blaas
             tpsThreshold := 1  ; Threshold for TPS for Blaas
-            cpsInterpretatie := "Combined positivity score (CPS): The number of PD-L1 staining cells (tumor cells and immune cells) divided by the total number of viable tumor cells multiplied by 100 (= score). For treatment with Pembrolizumab, the cutoff value is > or = 10."
-            tpsInterpretatie := "Tumor Proportion Score (TPS): The number of PD-L1 staining tumor cells divided by the total number of viable tumor cells (= percentage). For treatment with Nivolumab, the cutoff value is > or = 1%."
+            cpsInterpretatie := "Combined positivity score (CPS): The number of PD-L1 staining cells (tumor cells and immune cells) divided by the total number of viable tumor cells multiplied by 100 (= score). For treatment with Pembrolizumab, the cutoff value is >= 10."
+            tpsInterpretatie := "Tumor Proportion Score (TPS): The number of PD-L1 staining tumor cells divided by the total number of viable tumor cells (= percentage). For treatment with Nivolumab, the cutoff value is >= 1%."
         case "Cervix":
             cpsThreshold := 1  ; Threshold for CPS for Cervix
-            cpsInterpretatie := "Combined positivity score (CPS): The number of PD-L1 staining cells (tumor cells and immune cells) divided by the total number of viable tumor cells multiplied by 100 (= score). For treatment with Pembrolizumab, the cutoff value is > or = 1."
+            cpsInterpretatie := "Combined positivity score (CPS): The number of PD-L1 staining cells (tumor cells and immune cells) divided by the total number of viable tumor cells multiplied by 100 (= score). For treatment with Pembrolizumab, the cutoff value is >= 1."
     }
 
     ; Check if the entered score is a number
@@ -579,6 +579,7 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
 
     ; Return the result
     return result
+}
 
 ::*41::
 {	; Colonresectie
