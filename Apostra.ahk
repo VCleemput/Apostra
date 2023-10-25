@@ -526,7 +526,7 @@ _PDL1ButtonOK(*)
 	MyGui.AddText("xs section w200", "Gradering")
 	gradering := MyGui.AddDDL("ys w200 Choose1", ["1","2","3","niet van toepassing"])
 	MyGui.AddText("xs section w200", "Invasiediepte")
-	invasiediepte := MyGui.AddComboBox("ys w200 Choose1",["intramucosaal adenocarcinoom", "submucosa", "muscularis propria", "omliggend vetweefsel", "serosa, met serosale doorbraak"])
+	invasiediepte := MyGui.AddDDL("ys w200 Choose1",["intramucosaal adenocarcinoom", "submucosa", "muscularis propria", "subserosa", "adventitia", "serosa, met serosale doorbraak"])
 	MyGui.AddText("xs section w200", "LVI")
 	lvi := MyGui.AddComboBox("ys w200 Choose1", ["afwezig","aanwezig"])
 	MyGui.AddText("xs section w200", "PNI")
@@ -544,7 +544,7 @@ _PDL1ButtonOK(*)
 	MyGui.AddText("xs section w200", "Precursorletsel")
 	precursorLetsel := MyGui.AddEdit("ys w200", "Niet aantoonbaar")
 	MyGui.AddText("xs section w200", "Specimen")
-	specimen := MyGui.AddComboBox("ys w200 Choose1", ["distaal colon", "colon transversum", "colon ascendens", "sigmoid", "rectum", "locatie niet gegeven"])
+	specimen := MyGui.AddComboBox("ys w200 Choose1", ["distaal colon", "colon transversum", "colon ascendens", "caecum", "sigmoid", "rectum", "locatie niet gegeven"])
 	specimen.OnEvent("change", _togglerectum)
 	MyGui.AddText("xs section w200", "Diameter tumor(mm)")
 	diameter := MyGui.AddEdit("ys w200", "")
@@ -579,8 +579,8 @@ _toggleNACT(*)
 
 _41ButtonOK(*)
 {
-	if InStr("submucosa , muscularis propria , omliggend vetweefsel , serosa, met serosale doorbraak", invasiediepte.text)
-		invasiediepte.text := "Invasief tot in de " . invasiediepte.text . "."
+	if InStr("submucosa , muscularis propria , subserosa, adventitia, serosa, met serosale doorbraak", invasiediepte.text)
+		invasiedieptetext := "Invasief tot in de " . invasiediepte.text . "."
 	if (gradering.text == "niet van toepassing")
 		graderingbesluit := ", gradering niet van toepassing."
 	Else
@@ -602,7 +602,7 @@ _41ButtonOK(*)
 		"Invasief carcinoom: <br>"
 		"-Histologisch type (op basis van WHO classificatie): " . typeCarcinoom.text . "<br>"
 		"-Histologische gradering: graad " gradering.text "<br>"
-		"-Invasiediepte: " invasiediepte.text "<br>"
+		"-Invasiediepte: " invasiedieptetext "<br>"
 		"-Lymfovasculaire invasie: " . lvi.text . "<br>"
 		"-Perineurale invasie: " . pni.text . "<br>"
 		dvorakmic
