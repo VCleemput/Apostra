@@ -279,12 +279,14 @@ SendHTML(synopsis)
 	lateraliteit := MyGUI.AddComboBox("ys w200", ["links","rechts","lateraliteit niet gegeven"])
 	MyGUI.AddText("xm w200 section", "Type carcinoom")
 	typeCarcinoom := MyGUI.AddComboBox("ys w200 Choose1", ["Invasief carcinoom NST (ductaal)","Invasief lobulair carcinoom","Mucineus carcinoom","Tubulair carcinoom","Metaplastisch carcinoom"])
-	MyGUI.AddText("xm w200 section", "Glandulair")
-	glandulair := MyGUI.AddDDL("ys w200 Choose2 AltSubmit", ["Score 1, >75% klierbuisformatie","Score 2, 10-75% klierbuisformatie","Score 3, <10% klierbuisformatie"])
-	MyGUI.AddText("xm w200 section", "Kern")
-	kern := MyGUI.AddDDL("ys w200 Choose2 AltSubmit", ["Score 1, kleine, uniforme kernen","Score 2, matige kernvariabiliteit","Score 3, grote, sterk variabele kernen"])
+	MyGUI.AddText("xm w200 section", "Architectuur")
+	architectuur := MyGUI.AddDDL("ys w200 Choose2 AltSubmit", ["Score 1, >75% klierbuisformatie","Score 2, 10-75% klierbuisformatie","Score 3, <10% klierbuisformatie"])
+	MyGUI.AddText("xm w200 section", "Atypie")
+	atypie := MyGUI.AddDDL("ys w200 Choose2 AltSubmit", ["Score 1, kleine, uniforme kernen","Score 2, matige kernvariabiliteit","Score 3, grote, sterk variabele kernen"])
 	MyGUI.AddText("xm w200 section", "Mitose score")
 	mitose := MyGUI.AddDDL("ys w200 Choose1 Altsubmit", ["Score 1","Score 2","Score 3"])
+	MyGUI.AddText("xm w200 section", "Beschrijving")
+	Beschrijving := MyGui.AddEdit("ys w400", "")
 	MyGUI.AddText("xm w200 section", "CIS")
 	CIS := MyGUI.AddCheckbox("ys", "CIS?")
 	CIS.OnEvent("Click", _CISButton)
@@ -304,6 +306,8 @@ SendHTML(synopsis)
 	necrose := MyGUI.AddCheckbox("ys", "")
 	MyGUI.AddText("xm section w200 h20", "microcalcificaties")
 	microcalcificaties := MyGUI.AddCheckbox("ys", "")
+	MyGUI.AddText("xm w200 section", "Bijkomende bevindingen")
+	Bijkomende bevindingen := MyGui.AddEdit("ys w400", "")
 	MyGUI.AddText("xm section w200 h20", "TILs")
 	tils := MyGUI.AddEdit("ys w200", "")
 	MyGUI.AddButton("xm section w50 h20 Default", "OK").OnEvent("Click", _69pbButtonOK)
@@ -333,7 +337,7 @@ _CISButton(*){
 
 _69pbButtonOK(*){
 	MyGUI.Hide()
-	score := kern.value + mitose.value + glandulair.value
+	score := atypie.value + mitose.value + architectuur.value
 	if score <= 5
 		gradering := "graad 1"
 	else if score <=7
@@ -367,20 +371,22 @@ _69pbButtonOK(*){
 
 	html :=
 	(
-		"<b>Maligne veranderingen:</b><br>"
-		typeCarcinoom.text " - " gradering "<br>"
-		"-Glandulair: score " glandulair.value "<br>"
-		"-Kernpleiomorfie: score " kern.value "<br>"
-		"-Mitosetelling: score " mitose.value "<br><br>"
+		"<b>Protocol gebaseerd op CAP richtlijn:</b><br>"
+		"Histologisch type" typeCarcinoom.text " 
+		- "Graad"<br>"
+		"Nottingham score:"-Architectuur score " architectuur.value "<br>"
+		"-Atypie score " atypie.value "<br>"
+		"-Mitose score " mitose.value "<br><br>"
+		"Beschrijving:" "beschrijving.text" <br>"
 		"In situ carcinoom: " cis " " graderingCis.text " " typeCismicro komma groeipatroon "<br><br>"
-		"Tumorload: " tumorload.text "% tumorcel oppervlak op totale weefseloppervlak.<br>"
 		"Lymfovasculaire invasie: " lvi ".<br>"
 		"Perineurale invasie: " pni ".<br>"
 		"Necrose: " necrose ".<br>"
 		"Microcalcificaties: " microcalcificaties ".<br>"
 		"TIL's: " tils.text "%.<br><br>"
+		"Bijkomende bevindingen: "bijkomende bevindingen.text"<br>"
 		"<b>Besluit:</b><br>"
-		"CNB borst " lateraliteit.text ": B5: Maligne: " typeCarcinoom.text ", " gradering ". " textCISbesluit " Predictieve merkers volgen."
+		"CNB borst " lateraliteit.text ":" typeCarcinoom.text ", " gradering ". " textCISbesluit " Borstpanel volgt."
 	) 
 
 	SendHTML(html, aw)
