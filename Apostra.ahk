@@ -477,45 +477,108 @@ IniListRead(path, section, key)
 {
 	return StrSplit(IniRead(path, section, key), ";")
 }
-::*pd::
-{	;PD-L1
-	aw := WinActive("A")
-	MyGui := Gui(,"PD-L1")
-	interpretatie_tekst := MyGui.AddText("xm section w200", "Interpretatie")
-	interpretatie := MyGui.AddDDL("ys w200 Choose1", ["CPS", "TPS", "IC"])
-	score_tekst := MyGui.AddText("xm section w200", interpretatie.text . "-score")
-	score := MyGui.AddEdit("ys w200", )
-	interpretatie.OnEvent("change", (*) => (score_tekst.text := interpretatie.text . "-score"))
-	techniek_tekst := MyGui.AddText("xm section w200", "Techniek")
-	techniek := MyGui.AddCombobox("ys w200 Choose1", IniListRead("lab-variables.ini", "PD-L1", "techniek"))
-	toestel_tekst := MyGui.AddText("xm section w200", "Toestel")
-	toestel := MyGui.AddCombobox("ys w200 Choose1", IniListRead("lab-variables.ini", "PD-L1", "toestel"))
-	MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
-	MyGui.Show("AutoSize")
+::*pdl1::
+{
+    aw := WinExist("A")
+    MyGui := Gui(, "PDL1")
+    Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
+    Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Cervix"])
+    ScoreText := MyGui.AddText("xm section w200", "Score:")
+    ScoreEdit := MyGui.AddEdit("ys w200")
+    ScoreType := MyGui.AddText("xm section w200", "Score Type:")
+    ScoreTypeDropdown := MyGui.AddDropDownList("ys w200", ["TPS", "CPS"])
+    ExternalControlsText := MyGui.AddText("xm section w200", "Externe/interne controles:")
+    ExternalControlsCheckbox := MyGui.AddCheckbox("xm section w200", "Controles OK")
+
+    MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
+    MyGui.Show()
+    Return
+}
 
 _PDL1ButtonOK(*)
 {
-	html := "<b><u>Resultaat PD-L1 IHC analyse</u></b><br>"
-	html .=	"<b>Techniek: </b>uitgevoerd met " . techniek.text . " op " . toestel.text . ".<br>"
-	html .= "<b>Interpretatie: </b>"
-	if interpretatie.text = "CPS"
-		html .= "Combined positivity score (CPS): het aantal PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score).<br>"
-	if interpretatie.text = "TPS"
-		html .= "Tumour Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage).<br>"
-	if interpretatie.text = "IC"
-		html .= "Immune cell area (IC): gebied Ingenomen door het PD-L1 aankleurende immuuncellen gedeeld door het totale tumorgebied (= percentage).<br>"
-	html.= "<b>Besluit: </b>"
-	html .= "PD-L1 (" . techniek.text . "): " . interpretatie.text . " = " . score.text
-	if interpretatie.text != "CPS"
-		html .= "%"
-	html.= ".<br>"
-	accreditatie := IniRead("lab-variables.ini", "PD-L1", "accreditatie") 
-	if accreditatie != ""
-		html .= "<small>" . accreditatie . "</small><br>"
-	SendHTML(html, aw)
-	MyGui.Destroy()
+    ; Retrieve the selected option from the dropdown
+    GuiControlGet, selectedOption, Choice, Matrix
+    ScoreTypeDropdown := MyGui.GetControl("Dropdown", "ScoreTypeDropdown")
+    ScoreType := ScoreTypeDropdown.GetChoice()
+    ScoreEdit := MyGui.GetControl("Edit", "ScoreEdit")
+    enteredScore := ScoreEdit.GetText()
+
+    ; Retrieve the status of external/interior controls checkbox
+    ExternalControlsCheckbox := MyGui.GetControl("Checkbox", "ExternalControlsCheckbox")
+    externalControlsOK := ExternalControlsCheckbox.IsChecked() ? "Yes" : "No"
+
+    result := SetScoresAndCheckPositivity(selectedOption, ScoreType, enteredScore, externalControlsOK)
+    MsgBox, % result
+    MyGui.Destroy()
 }
-}
+
+SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
+{
+    ; Initialize variables for CPS and TPS thresholds for each organ
+    cpsThreshold := 10  ; Default CPS threshold
+    tpsThreshold := 1   ; Default TPS threshold
+
+    ; Set thresholds based on the selected organ
+    switch (organ) {
+        case "Blaas":
+            cpsThreshold := 10  ; Threshold for CPS for Blaas
+            tpsThreshold := 1  ; Threshold for TPS for Blaas
+            cpsInterpretatie := "Combined positivity score (CPS): The number of PD-L1 staining cells (tumor cells and immune cells) divided by the total number of viable tumor cells multiplied by 100 (= score). For treatment with Pembrolizumab, the cutoff value is > or = 10."
+            tpsInterpretatie := "Tumor Proportion Score (TPS): The number of PD-L1 staining tumor cells divided by the total number of viable tumor cells (= percentage). For treatment with Nivolumab, the cutoff value is > or = 1%."
+        case "Cervix":
+            cpsThreshold := 1  ; Threshold for CPS for Cervix
+            cpsInterpretatie := "Combined positivity score (CPS): The number of PD-L1 staining cells (tumor cells and immune cells) divided by the total number of viable tumor cells multiplied by 100 (= score). For treatment with Pembrolizumab, the cutoff value is > or = 1."
+    }
+
+    ; Check if the entered score is a number
+    if IsNumber(enteredScore) {
+        enteredScore := Round(enteredScore) ; Round the entered score to an integer
+
+        ; Check if CPS is positive
+        if (scoreType = "CPS") {
+            if (enteredScore >= cpsThreshold) {
+                result := "CPS is positive"
+            } else {
+                result := "CPS is negative"
+            }
+            explanation := cpsInterpretatie
+        }
+        ; Check if TPS is positive
+        else if (scoreType = "TPS") {
+            if (enteredScore >= tpsThreshold) {
+                result := "TPS is positive"
+            } else {
+                result := "TPS is negative"
+            }
+            explanation := tpsInterpretatie
+        }
+
+        ; Include the external controls status in the HTML
+        if (externalControlsOK = "Yes") {
+            externalControlsStatus := "Externe/interne controles zijn opgegaan"
+        } else {
+            externalControlsStatus := "Externe/interne controles zijn niet opgegaan"
+        }
+
+        ; Generate the HTML output 
+        html := "<b><u>Aanvullende immuunhistochemie voor PD-L1 (<@DATE@>/<@USERLONG@>):</u></b><br>"
+        html .= "<b>Orgaan:</b> " organ "<br>"
+        html .= "<b>Techniek:</b> uitgevoerd met 22C3 antilichaam (Agilent) op het Benchmark Ultra toestel (Roche)<br>"
+        html .= "<b>Score Type:</b> " scoreType "<br>"
+        html .= "<b>Interpretatie:</b> " explanation "<br>"
+        html .= "<b>Externe/interne controle:</b> " externalControlsStatus "<br>"
+        html .= "<b>Score:</b> " enteredScore "<br>"
+        html .= "<b>Result:</b> " result "<br>"
+
+        ; Display the HTML content
+        SendHTML(html)
+    } else {
+        result := "Invalid score. Please enter a number."
+    }
+
+    ; Return the result
+    return result
 
 ::*41::
 {	; Colonresectie
