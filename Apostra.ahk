@@ -480,7 +480,7 @@ IniListRead(path, section, key)
 ::*pdl1::
 {
     aw := WinExist("A")
-    MyGui := Gui("PDL1")
+    MyGui := Gui(, "PDL1")
     Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
     Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Cervix"])
     ScoreText := MyGui.AddText("xm section w200", "Score:")
@@ -493,23 +493,12 @@ IniListRead(path, section, key)
     MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
     MyGui.Show()
     Return
-}
+
 
 _PDL1ButtonOK(*)
 {
-    ; Retrieve the selected option from the dropdown
-    GuiControlGet, selectedOption, Choice, Matrix
-    ScoreTypeDropdown := MyGui.GetControl("Dropdown", "ScoreTypeDropdown")
-    ScoreType := ScoreTypeDropdown.GetChoice()
-    ScoreEdit := MyGui.GetControl("Edit", "ScoreEdit")
-    enteredScore := ScoreEdit.GetText()
-
-    ; Retrieve the status of external/interior controls checkbox
-    ExternalControlsCheckbox := MyGui.GetControl("Checkbox", "ExternalControlsCheckbox")
-    externalControlsOK := ExternalControlsCheckbox.IsChecked() ? "Yes" : "No"
-
-    result := SetScoresAndCheckPositivity(selectedOption, ScoreType, enteredScore, externalControlsOK)
-    MsgBox, % result
+   	result := SetScoresAndCheckPositivity(Matrix.text, ScoreTypeDropdown.text, ScoreEdit.text, ExternalControlsCheckbox.value)
+    SendHTML(result, aw)
     MyGui.Destroy()
 }
 
@@ -524,11 +513,11 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
         case "Blaas":
             cpsThreshold := 10  ; Threshold for CPS for Blaas
             tpsThreshold := 1  ; Threshold for TPS for Blaas
-            cpsInterpretatie := "Combined positivity score (CPS): The number of PD-L1 staining cells (tumor cells and immune cells) divided by the total number of viable tumor cells multiplied by 100 (= score). For treatment with Pembrolizumab, the cutoff value is >= 10."
-            tpsInterpretatie := "Tumor Proportion Score (TPS): The number of PD-L1 staining tumor cells divided by the total number of viable tumor cells (= percentage). For treatment with Nivolumab, the cutoff value is >= 1%."
+            cpsInterpretatie := "Combined positivity score (CPS): The number of PD-L1 staining cells (tumor cells and immune cells) divided by the total number of viable tumor cells multiplied by 100 (= score). For treatment with Pembrolizumab, the cutoff value is > or = 10."
+            tpsInterpretatie := "Tumor Proportion Score (TPS): The number of PD-L1 staining tumor cells divided by the total number of viable tumor cells (= percentage). For treatment with Nivolumab, the cutoff value is > or = 1%."
         case "Cervix":
             cpsThreshold := 1  ; Threshold for CPS for Cervix
-            cpsInterpretatie := "Combined positivity score (CPS): The number of PD-L1 staining cells (tumor cells and immune cells) divided by the total number of viable tumor cells multiplied by 100 (= score). For treatment with Pembrolizumab, the cutoff value is >= 1."
+            cpsInterpretatie := "Combined positivity score (CPS): The number of PD-L1 staining cells (tumor cells and immune cells) divided by the total number of viable tumor cells multiplied by 100 (= score). For treatment with Pembrolizumab, the cutoff value is > or = 1."
     }
 
     ; Check if the entered score is a number
@@ -570,15 +559,11 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
         html .= "<b>Externe/interne controle:</b> " externalControlsStatus "<br>"
         html .= "<b>Score:</b> " enteredScore "<br>"
         html .= "<b>Result:</b> " result "<br>"
-
-        ; Display the HTML content
-        SendHTML(html)
+		return html
     } else {
-        result := "Invalid score. Please enter a number."
+        return "Invalid score. Please enter a number."
     }
-
-    ; Return the result
-    return result
+}
 }
 
 ::*41::
