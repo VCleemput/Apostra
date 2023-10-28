@@ -483,21 +483,21 @@ IniListRead(path, section, key)
 {
 	return StrSplit(IniRead(path, section, key), ";")
 }
-:*pdl1::
-aw := WinExist("A")
-MyGui := Gui, Add, PDL1, PDL1
-Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
-Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom", "Long"])
-ScoreType := MyGui.AddText("xm section w200", "Score Type:")
-ScoreTypeDropdown := MyGui.AddDropDownList("ys w200", ["TPS", "CPS"])
-ScoreText := MyGui.AddText("xm section w200", "Score:")
-ScoreEdit := MyGui.AddEdit("ys w200")
-ExternalControlsText := MyGui.AddText("xm section w200", "Externe/interne controles:")
-ExternalControlsCheckbox := MyGui.AddCheckbox("xm section w200", "Controles OK")
+::*pdl1::
+	aw := WinExist("A")
+	MyGui := Gui, Add, PDL1, PDL1
+	Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
+	Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom", "Long"])
+	ScoreType := MyGui.AddText("xm section w200", "Score Type:")
+	ScoreTypeDropdown := MyGui.AddDropDownList("ys w200", ["TPS", "CPS"])
+	ScoreText := MyGui.AddText("xm section w200", "Score:")
+	ScoreEdit := MyGui.AddEdit("ys w200")
+	ExternalControlsText := MyGui.AddText("xm section w200", "Externe/interne controles:")
+	ExternalControlsCheckbox := MyGui.AddCheckbox("xm section w200", "Controles OK")
 
-MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
-MyGui.Show()
-Return
+	MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
+	MyGui.Show()
+	Return
 
 _PDL1ButtonOK(*)
 {
