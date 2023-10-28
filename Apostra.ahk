@@ -488,7 +488,7 @@ IniListRead(path, section, key)
     aw := WinExist("A")
     MyGui := Gui(, "PDL1")
     Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
-    Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Cervix"])
+    Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom","long"])
     ScoreType := MyGui.AddText("xm section w200", "Score Type:")
     ScoreTypeDropdown := MyGui.AddDropDownList("ys w200", ["TPS", "CPS"])
     ScoreText := MyGui.AddText("xm section w200", "Score:")
@@ -519,14 +519,28 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
         case "Blaas":
             cpsThreshold := 10  ; Threshold for CPS for Blaas
             tpsThreshold := 1  ; Threshold for TPS for Blaas
-            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score).
-Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."
-            tpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage).
-Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 1%."
+            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."
+            tpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 1%."
+			case "Borst":
+			cpsThreshold := 10  ; Trehshold for CPS Borst
+			cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."		
         case "Cervix":
             cpsThreshold := 1  ; Threshold for CPS for Cervix
-            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score).
-Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1."
+            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1."
+		case "Hoofd hals":
+            cpsThreshold := 1  ; Threshold for CPS for Hoofd Hals
+            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1."
+		case "Slokdarm plaveiselcelcarcinoom":
+			cpsThreshold := 10  ; Threshold for CPS for Slokdarm plaveiselcelcarcinoom
+			tpsThreshold := 1  ; Threshold for TPS for Slokdarm plaveiselcelcarcinoom
+		cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."
+		tpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 1%."
+		case "Slokdarm-maag Adenocarcinoom":
+            cpsThreshold := 5  ; Threshold for CPS for Slokdarm-maag Adenocarcinoom
+            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 5."
+		case "Long":
+            tpsThreshold := 1  ; Threshold for TPS for Long
+            cpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor eerstelijnsbehandeling met Pembrolizumab/ Cemiplimab bedraagt de cut-off waarde > of = 50%. Voor eerstelijnsbehandeling met Durvalumab bedraagt de cut-off waarde > of = 1%. Voor tweedelijnsbehandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1 %." 
     }
 
     ; Check if the entered score is a number
