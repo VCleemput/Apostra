@@ -483,27 +483,25 @@ IniListRead(path, section, key)
 {
 	return StrSplit(IniRead(path, section, key), ";")
 }
-::*pdl1::
-{
-    aw := WinExist("A")
-    MyGui := Gui(, "PDL1")
-    Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
-    Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom","long"])
-    ScoreType := MyGui.AddText("xm section w200", "Score Type:")
-    ScoreTypeDropdown := MyGui.AddDropDownList("ys w200", ["TPS", "CPS"])
-    ScoreText := MyGui.AddText("xm section w200", "Score:")
-    ScoreEdit := MyGui.AddEdit("ys w200")
-    ExternalControlsText := MyGui.AddText("xm section w200", "Externe/interne controles:")
-    ExternalControlsCheckbox := MyGui.AddCheckbox("xm section w200", "Controles OK")
+:*pdl1::
+aw := WinExist("A")
+MyGui := Gui, Add, PDL1, PDL1
+Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
+Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom", "Long"])
+ScoreType := MyGui.AddText("xm section w200", "Score Type:")
+ScoreTypeDropdown := MyGui.AddDropDownList("ys w200", ["TPS", "CPS"])
+ScoreText := MyGui.AddText("xm section w200", "Score:")
+ScoreEdit := MyGui.AddEdit("ys w200")
+ExternalControlsText := MyGui.AddText("xm section w200", "Externe/interne controles:")
+ExternalControlsCheckbox := MyGui.AddCheckbox("xm section w200", "Controles OK")
 
-    MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
-    MyGui.Show()
-    Return
-
+MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
+MyGui.Show()
+Return
 
 _PDL1ButtonOK(*)
 {
-   	result := SetScoresAndCheckPositivity(Matrix.text, ScoreTypeDropdown.text, ScoreEdit.text, ExternalControlsCheckbox.value)
+    result := SetScoresAndCheckPositivity(Matrix.text, ScoreTypeDropdown.text, ScoreEdit.text, ExternalControlsCheckbox.value)
     SendHTML(result, aw)
     MyGui.Destroy()
 }
@@ -521,9 +519,9 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
             tpsThreshold := 1  ; Threshold for TPS for Blaas
             cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."
             tpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 1%."
-	case "Borst":
-	     cpsThreshold := 10  ; Trehshold for CPS Borst
-	     cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."		
+        case "Borst":
+            cpsThreshold := 10  ; Threshold for CPS for Borst
+            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."	
         case "Cervix":
             cpsThreshold := 1  ; Threshold for CPS for Cervix
             cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1."
