@@ -380,10 +380,7 @@ IniListRead(path, section, key)
 	Return
 
 _PDL1ButtonOK(*)
-{;  TPSSelected := TPS.Value
-    CPSSelected := CPS.Value
-
-    ; Initialize score variables
+{    ; Initialize score variables
     TPS_Score := ""
     CPS_Score := ""
 
