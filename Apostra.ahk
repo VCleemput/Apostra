@@ -363,38 +363,59 @@ IniListRead(path, section, key)
 {	aw := WinExist("A")
 	MyGui := Gui(, "pdl1")
 	Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
-	Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom", "Long"])
-	ScoreType := MyGui.AddText("xm section w200", "Score Type:")
-	TPS := MyGui.AddCheckbox("xm section", "TPS")
-    CPS := MyGui.AddCheckbox("xm section", "CPS")
+	Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "long" "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom"])
+	ScoreText := MyGui.AddText("xm section w200", "Score Type:")
+	ScoreType := MyGui.AddText("xm section w200")
+	
+; Create CPS and TPS score inputs
+ScoreTextCPS := MyGui.AddText("ys w200", "CPS-score:")
+ScoreEditCPS := MyGui.AddEdit("ys w200")
+ScoreTextTPS := MyGui.AddText("ys w200", "TPS-score:")
+ScoreEditTPS := MyGui.AddEdit("ys w200")
 
-    ScoreText := MyGui.AddText("xm section w200", "TPS-score:")
-    ScoreEditTPS := MyGui.AddEdit("ys w200")
-    ScoreText := MyGui.AddText("xm section w200", "CPS-score:")
-    ScoreEditCPS := MyGui.AddEdit("ys w200")
-	ExternalControlsText := MyGui.AddText("xm section w200", "Externe/interne controles:")
-	ExternalControlsCheckbox := MyGui.AddCheckbox("xm section w200", "Controles OK")
+ExternalControlsText := MyGui.AddText("xm section w200", "Externe/interne controles:")
+ExternalControlsCheckbox := MyGui.AddCheckbox("xm section w200", "Controles OK")
 
-	MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
-	MyGui.Show()
-	Return
+MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
+MyGui.Show()
+Matrix.OnEvent("Change", _OrganSelectionChanged)
+Return
+
+_OrganSelectionChanged(*)
+{
+    selectedOrgan := Matrix.Text
+
+    ; Show or hide CPS and TPS score input fields based on organ selection
+    ScoreTextCPS.Hide()
+    ScoreEditCPS.Hide()
+    ScoreTextTPS.Hide()
+    ScoreEditTPS.Hide()
+
+    if (selectedOrgan = "Blaas" || selectedOrgan = "Slokdarm plaveiselcelcarcinoom") {
+        ScoreTextCPS.Show()
+        ScoreEditCPS.Show()
+        ScoreTextTPS.Show()
+        ScoreEditTPS.Show()
+    } else if (selectedOrgan = "Borst" || selectedOrgan = "Cervix" || selectedOrgan = "Hoofd Hals" || selectedOrgan = "Slokdarm-maag Adenocarcinoom") {
+        ScoreTextCPS.Show()
+        ScoreEditCPS.Show()
+    } else if (selectedOrgan = "Long") {
+        ScoreTextTPS.Show()
+        ScoreEditTPS.Show()
+    }
+}
 
 _PDL1ButtonOK(*)
-{    ; Initialize score variables
-    TPS_Score := ""
-    CPS_Score := ""
+{
+    ; Get the selected organ, scoring method, and entered score
+    selectedOrgan := Matrix.Text
+    scoringMethod := ScoreType.Text
+    CPS_Score := ScoreEditCPS.Text
+    TPS_Score := ScoreEditTPS.Text
+    externalControlsOK := ExternalControlsCheckbox.Value
 
-    ; Get the scores if TPS is selected
-    if TPSSelected {
-        TPS_Score := ScoreEditTPS.Text
-    }
-
-    ; Get the scores if CPS is selected
-    if CPSSelected {
-        CPS_Score := ScoreEditCPS.Text
-    }
-
-    result := SetScoresAndCheckPositivity(Matrix.text,TPS_score, CPS_Score, ExternalControlsCheckbox.value)
+    ; Generate HTML based on the selected organ and scoring method
+    result := SetScoresAndCheckPositivity(selectedOrgan, scoringMethod, CPS_Score, TPS_Score, externalControlsOK)
     SendHTML(result, aw)
     MyGui.Destroy()
 }
@@ -431,7 +452,7 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
             cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 5."
 	case "Long":
             tpsThreshold := 1  ; Threshold for TPS for Long
-            cpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor eerstelijnsbehandeling met Pembrolizumab/ Cemiplimab bedraagt de cut-off waarde > of = 50%. Voor eerstelijnsbehandeling met Durvalumab bedraagt de cut-off waarde > of = 1%. Voor tweedelijnsbehandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1 %." 
+            tpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor eerstelijnsbehandeling met Pembrolizumab/ Cemiplimab bedraagt de cut-off waarde > of = 50%. Voor eerstelijnsbehandeling met Durvalumab bedraagt de cut-off waarde > of = 1%. Voor tweedelijnsbehandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1 %." 
     }
 
     ; Check if the entered score is a number
@@ -458,21 +479,20 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
         }
 
         ; Include the external controls status in the HTML
-        if (externalControlsOK = "Yes") {
+        if (externalControlsOK = "OK") {
             externalControlsStatus := "Externe/interne controles zijn opgegaan"
         } else {
             externalControlsStatus := "Externe/interne controles zijn niet opgegaan"
         }
 
         ; Generate the HTML output 
-        html := "<b><u>Aanvullende immuunhistochemie voor PD-L1 (<@DATE@>/<@USERLONG@>):</u></b><br>"
-        html .= "<b>Orgaan:</b> " organ "<br>"
-        html .= "<b>Techniek:</b> uitgevoerd met 22C3 antilichaam (Agilent) op het Benchmark Ultra toestel (Roche)<br>"
-        html .= "<b>Score Type:</b> " scoreType "<br>"
-        html .= "<b>Interpretatie:</b> " explanation "<br>"
-        html .= "<b>Externe/interne controle:</b> " externalControlsStatus "<br>"
-        html .= "<b>PD-L1 Score (22C3, Agilent):</b> " scoreType " " enteredScore "<br>"
-        html .= "<b>Resultaat:</b> " resultaat "<br>"
+		html := "<b><u>Aanvullende immuunhistochemie voor PD-L1 (<@DATE@>/<@USERLONG@>):</u></b><br>"
+		html .= "<b>Orgaan:</b> " organ "<br>"
+		html .= "<b>Techniek:</b> uitgevoerd met 22C3 antilichaam (Agilent) op het Benchmark Ultra toestel (Roche).<br>"
+		html .= "<b>Score Type:</b> " scoreType "<br>"
+		html .= "<b>Interpretatie:</b> " explanation "<br>"
+		html .= "<b>Externe/interne controle:</b> " externalControlsStatus "<br>"
+		html .= "<b>PD-L1 Score (22C3, Agilent):</b> " scoreType " " enteredScore " (dit komt overeen met een " resultaat " resultaat)<br>"
 		return html
     } else {
         return "Invalid score. Please enter a number."
