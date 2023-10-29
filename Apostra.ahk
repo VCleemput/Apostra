@@ -361,13 +361,17 @@ IniListRead(path, section, key)
 }
 ::*pdl1::
 {	aw := WinExist("A")
-	MyGui := Gui (, "PDL1")
+	MyGui := Gui(, "pdl1")
 	Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
 	Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom", "Long"])
 	ScoreType := MyGui.AddText("xm section w200", "Score Type:")
-	ScoreTypeDropdown := MyGui.AddDropDownList("ys w200", ["TPS", "CPS"])
-	ScoreText := MyGui.AddText("xm section w200", "Score:")
-	ScoreEdit := MyGui.AddEdit("ys w200")
+	TPS := MyGui.AddCheckbox("xm section", "TPS")
+    CPS := MyGui.AddCheckbox("xm section", "CPS")
+
+    ScoreText := MyGui.AddText("xm section w200", "TPS-score:")
+    ScoreEditTPS := MyGui.AddEdit("ys w200")
+    ScoreText := MyGui.AddText("xm section w200", "CPS-score:")
+    ScoreEditCPS := MyGui.AddEdit("ys w200")
 	ExternalControlsText := MyGui.AddText("xm section w200", "Externe/interne controles:")
 	ExternalControlsCheckbox := MyGui.AddCheckbox("xm section w200", "Controles OK")
 
@@ -376,8 +380,24 @@ IniListRead(path, section, key)
 	Return
 
 _PDL1ButtonOK(*)
-{
-    result := SetScoresAndCheckPositivity(Matrix.text, ScoreTypeDropdown.text, ScoreEdit.text, ExternalControlsCheckbox.value)
+{;  TPSSelected := TPS.Value
+    CPSSelected := CPS.Value
+
+    ; Initialize score variables
+    TPS_Score := ""
+    CPS_Score := ""
+
+    ; Get the scores if TPS is selected
+    if TPSSelected {
+        TPS_Score := ScoreEditTPS.Text
+    }
+
+    ; Get the scores if CPS is selected
+    if CPSSelected {
+        CPS_Score := ScoreEditCPS.Text
+    }
+
+    result := SetScoresAndCheckPositivity(Matrix.text,TPS_score, CPS_Score, ExternalControlsCheckbox.value)
     SendHTML(result, aw)
     MyGui.Destroy()
 }
