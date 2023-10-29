@@ -271,130 +271,6 @@ _qsButtonOK(*)
 SendHTML(synopsis)
 }
 
-::*69pb:: 
-{ 	;CNB borst
-	aw := WinExist("A")
-	MyGUI := Gui(,"CNB borst")
-	MyGUI.AddText("xm w200 section", "Lateraliteit")
-	lateraliteit := MyGUI.AddComboBox("ys w200", ["links","rechts","lateraliteit niet gegeven"])
-	MyGUI.AddText("xm w200 section", "Type carcinoom")
-	typeCarcinoom := MyGUI.AddComboBox("ys w200 Choose1", ["Invasief carcinoom NST (ductaal)","Invasief lobulair carcinoom","Mucineus carcinoom","Tubulair carcinoom","Metaplastisch carcinoom"])
-	MyGUI.AddText("xm w200 section", "Architectuur")
-	architectuur := MyGUI.AddDDL("ys w200 Choose2 AltSubmit", ["Score 1, >75% klierbuisformatie","Score 2, 10-75% klierbuisformatie","Score 3, <10% klierbuisformatie"])
-	MyGUI.AddText("xm w200 section", "Atypie")
-	atypie := MyGUI.AddDDL("ys w200 Choose2 AltSubmit", ["Score 1, kleine, uniforme kernen","Score 2, matige kernvariabiliteit","Score 3, grote, sterk variabele kernen"])
-	MyGUI.AddText("xm w200 section", "Mitose score")
-	mitose := MyGUI.AddDDL("ys w200 Choose1 Altsubmit", ["Score 1","Score 2","Score 3"])
-	MyGUI.AddText("xm w200 section", "Beschrijving")
-	Beschrijving := MyGui.AddEdit("ys w400", "")
-	MyGUI.AddText("xm w200 section", "CIS")
-	CIS := MyGUI.AddCheckbox("ys", "CIS?")
-	CIS.OnEvent("Click", _CISButton)
-	typeCistekst := MyGUI.AddText("xm+30 section w200 Disabled", "Type CIS")
-	typeCis := MyGUI.AddComboBox("ys w200 Disabled Choose1", ["ductaal","lobulair"])
-	graderingtekst := MyGUI.AddText("xm+30 section w200 Disabled", "Gradering")
-	graderingCis := MyGUI.AddComboBox("ys w200 Disabled Choose2", ["graad 1","graad 2","graad 3"])
-	groeipatroontekst := MyGUI.AddText("xm+30 section w200 Disabled", "Groeipatroon")
-	groeipatroon := MyGUI.AddListBox("ys w200 r7 Multi Disabled", ["cribriform","solied","papillair","comedo","clinging","pagetoid","uitbreidend in adenosis"])
-	MyGUI.AddText("xm section w200 h20", "Tumorload")
-	tumorload := MyGUI.AddEdit("ys w200", "")
-	MyGUI.AddText("xm section w200 h20", "LVI")
-	lvi := MyGUI.AddCheckbox("ys", "")
-	MyGUI.AddText("xm section w200 h20", "PNI")
-	pni := MyGUI.AddCheckbox("ys", "")
-	MyGUI.AddText("xm section w200 h20", "Necrose")
-	necrose := MyGUI.AddCheckbox("ys", "")
-	MyGUI.AddText("xm section w200 h20", "microcalcificaties")
-	microcalcificaties := MyGUI.AddCheckbox("ys", "")
-	MyGUI.AddText("xm w200 section", "Bijkomende bevindingen")
-	Bijkomende bevindingen := MyGui.AddEdit("ys w400", "")
-	MyGUI.AddText("xm section w200 h20", "TILs")
-	tils := MyGUI.AddEdit("ys w200", "")
-	MyGUI.AddButton("xm section w50 h20 Default", "OK").OnEvent("Click", _69pbButtonOK)
-	MyGUI.Show()
-	
-_CISButton(*){
-	if CIS.value = 1
-	{
-		typeCistekst.Enabled := 1
-		typeCis.Enabled := 1
-		graderingtekst.Enabled := 1
-		graderingCis.Enabled := 1
-		groeipatroontekst.Enabled := 1
-		groeipatroon.Enabled := 1
-	}
-	if CIS.value = 0
-	{
-		typeCistekst.Enabled := 0
-		typeCis.Enabled := 0
-		graderingtekst.Enabled := 0
-		graderingCis.Enabled := 0
-		groeipatroontekst.Enabled := 0
-		groeipatroon.Enabled := 0
-	}
-	return
-}
-
-_69pbButtonOK(*){
-	MyGUI.Hide()
-	score := atypie.value + mitose.value + architectuur.value
-	if score <= 5
-		gradering := "graad 1"
-	else if score <=7
-		gradering := "graad 2"
-	else if score <= 9
-		gradering := "graad 3"	
-	bin := Map(0,"afwezig",1,"aanwezig")
-	lvi :=bin[lvi.value]
-	pni := bin[pni.value]
-	necrose := bin[necrose.value]
-	microcalcificaties := bin[microcalcificaties.value]
-	if CIS.value = 1
-	{
-		textCISbesluit := "Eveneens " graderingCis.text " " typeCIS.text " carcinoma in situ."
-		cis := "aanwezig: "
-		komma := "; "
-		groeipatroon := StrJoin(groeipatroon.text, ", ")
-		typeCismicro := typeCis.text " carcinoma in situ"
-	}
-	else if CIS.value = 0
-	{
-		textCIS :=""
-		cis := "afwezig."
-		typeCIS := ""
-		graderingCis.text := ""
-		typeCismicro := ""
-		groeipatroon := ""
-		komma := ""
-		textCISbesluit := ""
-	}
-
-	html :=
-	(
-		"<b>Protocol gebaseerd op CAP richtlijn:</b><br>"
-		"Histologisch type" typeCarcinoom.text " 
-		- "Graad"<br>"
-		"Nottingham score:"-Architectuur score " architectuur.value "<br>"
-		"-Atypie score " atypie.value "<br>"
-		"-Mitose score " mitose.value "<br><br>"
-		"Beschrijving:" "beschrijving.text" <br>"
-		"In situ carcinoom: " cis " " graderingCis.text " " typeCismicro komma groeipatroon "<br><br>"
-		"Lymfovasculaire invasie: " lvi ".<br>"
-		"Perineurale invasie: " pni ".<br>"
-		"Necrose: " necrose ".<br>"
-		"Microcalcificaties: " microcalcificaties ".<br>"
-		"TIL's: " tils.text "%.<br><br>"
-		"Bijkomende bevindingen: "bijkomende bevindingen.text"<br>"
-		"<b>Besluit:</b><br>"
-		"CNB borst " lateraliteit.text ":" typeCarcinoom.text ", " gradering ". " textCISbesluit " Borstpanel volgt."
-	) 
-
-	SendHTML(html, aw)
-	MyGUI.Destroy()
-	return
-}
-}
-
 ::*88::
 {	;Melanoom
 	aw := WinExist("A")
@@ -485,7 +361,7 @@ IniListRead(path, section, key)
 }
 ::*pdl1::
 {	aw := WinExist("A")
-	MyGui := Gui, Add, PDL1, PDL1
+	MyGui := Gui (, "PDL1")
 	Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
 	Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom", "Long"])
 	ScoreType := MyGui.AddText("xm section w200", "Score Type:")
