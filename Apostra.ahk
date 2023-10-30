@@ -491,7 +491,7 @@ SetScoresAndCheckPositivity(organ, scoreType, CPS_Score, TPS_Score, externalCont
 		if ScoreEditCPS.Enabled
 			html .= "- CPS = " CPS_Score " (dit komt overeen met een " resultaatCPS " resultaat)<br>"
 		if ScoreEditTPS.Enabled
-			html .= "- TPS = " TPS_Score " (dit komt overeen met een " resultaatTPS " resultaat)<br>"
+			html .= "- TPS = " TPS_Score ""%" (dit komt overeen met een " resultaatTPS " resultaat)<br>"
 		return html
     } else {
         return "Invalid score. Please enter a number."
