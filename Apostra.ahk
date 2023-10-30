@@ -475,7 +475,7 @@ SetScoresAndCheckPositivity(organ, scoreType, CPS_Score, TPS_Score, externalCont
         }
 
         ; Include the external controls status in the HTML
-        if (externalControlsOK = "OK") {
+        if (externalControlsOK) {
             externalControlsStatus := "Externe/interne controles zijn opgegaan"
         } else {
             externalControlsStatus := "Externe/interne controles zijn niet opgegaan"
