@@ -363,14 +363,14 @@ IniListRead(path, section, key)
 {	aw := WinExist("A")
 	MyGui := Gui(, "pdl1")
 	Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
-	Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "long" "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom"])
+	Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "Long", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom"])
 	ScoreText := MyGui.AddText("xm section w200", "Score Type:")
-	ScoreType := MyGui.AddText("xm section w200")
+	ScoreType := MyGui.AddText("ys section w200")
 	
 ; Create CPS and TPS score inputs
-ScoreTextCPS := MyGui.AddText("ys w200", "CPS-score:")
+ScoreTextCPS := MyGui.AddText("xm section w200", "CPS-score:")
 ScoreEditCPS := MyGui.AddEdit("ys w200")
-ScoreTextTPS := MyGui.AddText("ys w200", "TPS-score:")
+ScoreTextTPS := MyGui.AddText("xm section w200", "TPS-score:")
 ScoreEditTPS := MyGui.AddEdit("ys w200")
 
 ExternalControlsText := MyGui.AddText("xm section w200", "Externe/interne controles:")
@@ -379,30 +379,16 @@ ExternalControlsCheckbox := MyGui.AddCheckbox("xm section w200", "Controles OK")
 MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
 MyGui.Show()
 Matrix.OnEvent("Change", _OrganSelectionChanged)
-Return
 
 _OrganSelectionChanged(*)
 {
     selectedOrgan := Matrix.Text
 
     ; Show or hide CPS and TPS score input fields based on organ selection
-    ScoreTextCPS.Hide()
-    ScoreEditCPS.Hide()
-    ScoreTextTPS.Hide()
-    ScoreEditTPS.Hide()
-
-    if (selectedOrgan = "Blaas" || selectedOrgan = "Slokdarm plaveiselcelcarcinoom") {
-        ScoreTextCPS.Show()
-        ScoreEditCPS.Show()
-        ScoreTextTPS.Show()
-        ScoreEditTPS.Show()
-    } else if (selectedOrgan = "Borst" || selectedOrgan = "Cervix" || selectedOrgan = "Hoofd Hals" || selectedOrgan = "Slokdarm-maag Adenocarcinoom") {
-        ScoreTextCPS.Show()
-        ScoreEditCPS.Show()
-    } else if (selectedOrgan = "Long") {
-        ScoreTextTPS.Show()
-        ScoreEditTPS.Show()
-    }
+    ScoreTextCPS.Enabled := (selectedOrgan = "Blaas" || selectedOrgan = "Slokdarm plaveiselcelcarcinoom" || selectedOrgan = "Borst" || selectedOrgan = "Cervix" || selectedOrgan = "Hoofd Hals" || selectedOrgan = "Slokdarm-maag Adenocarcinoom")
+    ScoreEditCPS.Enabled := ScoreTextCPS.Enabled
+    ScoreTextTPS.Enabled := ( selectedOrgan = "Blaas" || selectedOrgan = "Slokdarm plaveiselcelcarcinoom" || selectedOrgan = "Long")
+    ScoreEditTPS.Enabled := ScoreTextTPS.Enabled
 }
 
 _PDL1ButtonOK(*)
@@ -420,12 +406,13 @@ _PDL1ButtonOK(*)
     MyGui.Destroy()
 }
 
-SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
+SetScoresAndCheckPositivity(organ, scoreType, CPS_Score, TPS_Score, externalControlsOK)
 {
     ; Initialize variables for CPS and TPS thresholds for each organ
     cpsThreshold := 10  ; Default CPS threshold
     tpsThreshold := 1   ; Default TPS threshold
-
+	cpsInterpretatie := ""
+	tpsInterpretatie := ""
     ; Set thresholds based on the selected organ
     switch (organ) {
         case "Blaas":
@@ -456,26 +443,35 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
     }
 
     ; Check if the entered score is a number
-    if IsNumber(enteredScore) {
-        enteredScore := Round(enteredScore) ; Round the entered score to an integer
-
+	explanation := ""
+	fout := 0
+    if ScoreEditCPS.Enabled and not IsNumber(CPS_Score)
+		fout := 1
+	if ScoreEditTPS.Enabled and not IsNumber(TPS_Score)
+		fout := 1
+	if fout = 0
+	{
         ; Check if CPS is positive
-        if (scoreType = "CPS") {
-            if (enteredScore >= cpsThreshold) {
-                resultaat := "CPS is positief"
+        if (CPS_Score != "" and ScoreEditCPS.Enabled) {
+			CPS_Score := Round(CPS_Score) ; Round the entered score to an integer
+            if (CPS_Score >= cpsThreshold) {
+                resultaatCPS := "CPS is positief"
             } else {
-                resultaat := "CPS is negatief"
+                resultaatCPS := "CPS is negatief"
             }
-            explanation := cpsInterpretatie
+            explanation .= cpsInterpretatie
         }
         ; Check if TPS is positive
-        else if (scoreType = "TPS") {
-            if (enteredScore >= tpsThreshold) {
-                resultaat := "TPS is positief"
+        if (TPS_Score != "" and ScoreEditTPS.Enabled) {
+			TPS_Score := Round(TPS_Score) ; Round the entered score to an integer
+            if (TPS_Score >= tpsThreshold) {
+                resultaatTPS := "TPS is positief"
             } else {
-                resultaat := "TPS is negatief"
+                resultaatTPS := "TPS is negatief"
             }
-            explanation := tpsInterpretatie
+			if explanation != ""
+				explanation .= "<br>"
+			explanation := explanation . tpsInterpretatie
         }
 
         ; Include the external controls status in the HTML
@@ -489,10 +485,13 @@ SetScoresAndCheckPositivity(organ, scoreType, enteredScore, externalControlsOK)
 		html := "<b><u>Aanvullende immuunhistochemie voor PD-L1 (<@DATE@>/<@USERLONG@>):</u></b><br>"
 		html .= "<b>Orgaan:</b> " organ "<br>"
 		html .= "<b>Techniek:</b> uitgevoerd met 22C3 antilichaam (Agilent) op het Benchmark Ultra toestel (Roche).<br>"
-		html .= "<b>Score Type:</b> " scoreType "<br>"
 		html .= "<b>Interpretatie:</b> " explanation "<br>"
 		html .= "<b>Externe/interne controle:</b> " externalControlsStatus "<br>"
-		html .= "<b>PD-L1 Score (22C3, Agilent):</b> " scoreType " " enteredScore " (dit komt overeen met een " resultaat " resultaat)<br>"
+		html .= "<b>PD-L1 Score (22C3, Agilent):</b> <br>" 
+		if ScoreEditCPS.Enabled
+			html .= "- CPS = " CPS_Score " (dit komt overeen met een " resultaatCPS " resultaat)<br>"
+		if ScoreEditTPS.Enabled
+			html .= "- TPS = " TPS_Score " (dit komt overeen met een " resultaatTPS " resultaat)<br>"
 		return html
     } else {
         return "Invalid score. Please enter a number."
