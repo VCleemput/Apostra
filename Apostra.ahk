@@ -455,9 +455,9 @@ SetScoresAndCheckPositivity(organ, scoreType, CPS_Score, TPS_Score, externalCont
         if (CPS_Score != "" and ScoreEditCPS.Enabled) {
 			CPS_Score := Round(CPS_Score) ; Round the entered score to an integer
             if (CPS_Score >= cpsThreshold) {
-                resultaatCPS := "CPS is positief"
+                resultaatCPS := "positief"
             } else {
-                resultaatCPS := "CPS is negatief"
+                resultaatCPS := "negatief"
             }
             explanation .= cpsInterpretatie
         }
@@ -465,9 +465,9 @@ SetScoresAndCheckPositivity(organ, scoreType, CPS_Score, TPS_Score, externalCont
         if (TPS_Score != "" and ScoreEditTPS.Enabled) {
 			TPS_Score := Round(TPS_Score) ; Round the entered score to an integer
             if (TPS_Score >= tpsThreshold) {
-                resultaatTPS := "TPS is positief"
+                resultaatTPS := "positief"
             } else {
-                resultaatTPS := "TPS is negatief"
+                resultaatTPS := "negatief"
             }
 			if explanation != ""
 				explanation .= "<br>"
