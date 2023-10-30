@@ -363,7 +363,7 @@ IniListRead(path, section, key)
 {	aw := WinExist("A")
 	MyGui := Gui(, "pdl1")
 	Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
-	Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "Long", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom"])
+	Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd hals", "Long", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom"])
 	ScoreText := MyGui.AddText("xm section w200", "Score Type:")
 	ScoreType := MyGui.AddText("ys section w200")
 	
