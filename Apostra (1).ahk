@@ -488,7 +488,6 @@ if (ScoreEditTPS.Enabled and TPS_Score != "") {
         return "Invalid TPS score. Please enter a number."
     }
 }
-
         ; Include the external controls status in the HTML
         if (externalControlsOK) {
             externalControlsStatus := "Externe/interne controles zijn conform de vooropgestelde criteria."
