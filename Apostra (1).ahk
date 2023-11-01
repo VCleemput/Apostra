@@ -12,7 +12,7 @@ SendHTML(html, aw := WinExist("A"))
 	;function to send the html to the clipboard and paste it
     global backup
 	wc := Winclip()
-	html := '<div style="font-size:10pt">' html  '</div>'
+	html := '<div style="font-size:11pt">' html  '</div>'
 	;OldClipboard := WinClip.Snap() ;om de een of andere reden werkt 'm zonder dit niet in WORD
 	OldClipboard := A_Clipboard
 	A_Clipboard :=""
@@ -360,184 +360,167 @@ IniListRead(path, section, key)
 	return StrSplit(IniRead(path, section, key), ";")
 }
 ::*pdl1::
-{
-    aw := WinExist("A")
-    MyGui := Gui(, "pdl1")
-    organ := MyGui.AddText("xm section w200", "Orgaan")
-	Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd Hals", "long", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom"])
-    ScoreText := MyGui.AddText("xm section w200", "Score Type:")
-    ScoreType := MyGui.AddText("xm section w200")
+{	aw := WinExist("A")
+	MyGui := Gui(, "pdl1")
+	Patholoog_tekst := MyGui.AddText("xm section w200", "Patholoog")
+	Patholoog := MyGui.AddDropDownList("ys w500 Choose1", ["AD", "AH", "FC", "DC", "KV", "LF", "JVD", "SV"])
+	Orgaan_tekst := MyGui.AddText("xm section w200", "Orgaan")
+	Matrix := MyGui.AddDropDownList("ys w500 Choose1", ["Blaas", "Borst", "Cervix", "Hoofd hals", "Long", "Slokdarm-maag Adenocarcinoom", "Slokdarm plaveiselcelcarcinoom"])
+	ScoreText := MyGui.AddText("xm section w200", "Score Type:")
+	ScoreType := MyGui.AddText("ys section w200")
+	
+; Create CPS and TPS score inputs
+ScoreTextCPS := MyGui.AddText("xm section w200", "CPS-score:")
+ScoreEditCPS := MyGui.AddEdit("ys w200")
+ScoreTextTPS := MyGui.AddText("xm section w200", "TPS-score:")
+ScoreEditTPS := MyGui.AddEdit("ys w200")
 
-    ; Create CPS and TPS score inputs
-    ScoreTextCPS := MyGui.AddText("ys w200", "CPS-score:")
-    ScoreEditCPS := MyGui.AddEdit("ys w200")
-    ScoreTextTPS := MyGui.AddText("ys w200", "TPS-score:")
-    ScoreEditTPS := MyGui.AddEdit("ys w200")
+ExternalControlsText := MyGui.AddText("xm section w200", "Externe/interne controles:")
+ExternalControlsCheckbox := MyGui.AddCheckbox("xm section w200", "Controles OK")
 
-    ExternalControlsText := MyGui.AddText("xm section w200", "Externe/interne controles:")
-    ExternalControlsCheckbox := MyGui.AddCheckbox("xm section w200", "Controles OK")
-
-    MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
-    MyGui.Show()
-    Matrix.OnEvent("Change", _OrganSelectionChanged)
-    Return
-}
+MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
+MyGui.Show()
+Matrix.OnEvent("Change", _OrganSelectionChanged)
 
 _OrganSelectionChanged(*)
-{ 
-	selectedOrgan := Matrix.Choice 
+{
+    selectedOrgan := Matrix.Text
 
     ; Show or hide CPS and TPS score input fields based on organ selection
-    if (selectedOrgan = "Blaas" || selectedOrgan = "Slokdarm plaveiselcelcarcinoom") {
-        ScoreTextCPS.Show()
-        ScoreEditCPS.Show()
-        ScoreTextTPS.Show()
-        ScoreEditTPS.Show()
-    } else if (selectedOrgan = "Borst" || selectedOrgan = "Cervix" || selectedOrgan = "Hoofd Hals" || selectedOrgan = "Slokdarm-maag Adenocarcinoom") {
-        ScoreTextCPS.Show()
-        ScoreEditCPS.Show()
-        ScoreTextTPS.Hide()
-        ScoreEditTPS.Hide()
-    } else if (selectedOrgan = "Long") {
-        ScoreTextCPS.Hide()
-        ScoreEditCPS.Hide()
-        ScoreTextTPS.Show()
-        ScoreEditTPS.Show()
-    }
+    ScoreTextCPS.Enabled := (selectedOrgan = "Blaas" || selectedOrgan = "Slokdarm plaveiselcelcarcinoom" || selectedOrgan = "Borst" || selectedOrgan = "Cervix" || selectedOrgan = "Hoofd Hals" || selectedOrgan = "Slokdarm-maag Adenocarcinoom")
+    ScoreEditCPS.Enabled := ScoreTextCPS.Enabled
+    ScoreTextTPS.Enabled := ( selectedOrgan = "Blaas" || selectedOrgan = "Slokdarm plaveiselcelcarcinoom" || selectedOrgan = "Long")
+    ScoreEditTPS.Enabled := ScoreTextTPS.Enabled
 }
 
 _PDL1ButtonOK(*)
 {
-    ; Get the selected organ, scoring method, and entered scores
+	currentDate := FormatTime(,"dd/MM/yyyy")
+
+    ; Get the  selected organ, scoring method, and entered score
     selectedOrgan := Matrix.Text
     scoringMethod := ScoreType.Text
     CPS_Score := ScoreEditCPS.Text
     TPS_Score := ScoreEditTPS.Text
     externalControlsOK := ExternalControlsCheckbox.Value
-    explanation := ""
-
-    ; Determine which scores and explanations to use based on the selected organ
-    if (selectedOrgan = "Cervix" || selectedOrgan = "Borst" || selectedOrgan = "Hoofd Hals" || selectedOrgan = "Slokdarm-maag Adenocarcinoom") {
-        explanation := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1."
-        TPS_Score := "" ; Clear TPS score
-    } else if (selectedOrgan = "Blaas" || selectedOrgan = "Slokdarm plaveiselcelcarcinoom") {
-        explanation := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."
-        ; For "Blaas" and "Slokdarm plaveiselcelcarcinoom," include TPS score and explanation
-        TPS_Score := ScoreEditTPS.Text
-        TPS_explanation := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 1%."
-    } else if (selectedOrgan = "Long") {
-        explanation := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor eerstelijnsbehandeling met Pembrolizumab/ Cemiplimab bedraagt de cut-off waarde > of = 50%. Voor eerstelijnsbehandeling met Durvalumab bedraagt de cut-off waarde > of = 1%. Voor tweedelijnsbehandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1%."
-        CPS_Score := "" ; Clear CPS score
-    }
 
     ; Generate HTML based on the selected organ and scoring method
-    if (selectedOrgan = "Blaas" || selectedOrgan = "Slokdarm plaveiselcelcarcinoom") {
-        explanation := explanation . "<br>" . TPS_explanation
-    }
-
-    result := SetScoresAndCheckPositivity(selectedOrgan, scoringMethod, CPS_Score, TPS_Score, externalControlsOK, explanation)
+    result := SetScoresAndCheckPositivity(selectedOrgan, scoringMethod, CPS_Score, TPS_Score, externalControlsOK, currentDate, Patholoog)
     SendHTML(result, aw)
     MyGui.Destroy()
 }
 
-SetScoresAndCheckPositivity(oselectedOrgan, scoringMethod, CPS_Score, TPS_Score, externalControlsOK, explanation)
+SetScoresAndCheckPositivity(organ, scoreType, CPS_Score, TPS_Score, externalControlsOK, currentDate, Patholoog)
 {
     ; Initialize variables for CPS and TPS thresholds for each organ
     cpsThreshold := 10  ; Default CPS threshold
     tpsThreshold := 1   ; Default TPS threshold
+	cpsInterpretatie := ""
+	tpsInterpretatie := ""
+	explanation := ""
 
+	  ; Check if the entered score is a number
+	  explanation := ""
+	  fout := 0
+	  if ScoreEditCPS.Enabled and not IsNumber(CPS_Score)
+		  fout := 1
+	  if ScoreEditTPS.Enabled and not IsNumber(TPS_Score)
+		  fout := 1
+	  if fout = 0 {
+	
     ; Set thresholds based on the selected organ
     switch (organ) {
         case "Blaas":
             cpsThreshold := 10  ; Threshold for CPS for Blaas
             tpsThreshold := 1  ; Threshold for TPS for Blaas
-            explanation := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."
+            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."
             tpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 1%."
         case "Borst":
             cpsThreshold := 10  ; Threshold for CPS for Borst
-            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."
+            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."	
         case "Cervix":
             cpsThreshold := 1  ; Threshold for CPS for Cervix
             cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1."
-        case "Hoofd hals":
+	case "Hoofd hals":
             cpsThreshold := 1  ; Threshold for CPS for Hoofd Hals
             cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1."
-        case "Slokdarm plaveiselcelcarcinoom":
-            cpsThreshold := 10  ; Threshold for CPS for Slokdarm plaveiselcelcarcinoom
-            tpsThreshold := 1  ; Threshold for TPS for Slokdarm plaveiselcelcarcinoom
-            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."
-            tpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 1%."
-        case "Slokdarm-maag Adenocarcinoom":
+	case "Slokdarm plaveiselcelcarcinoom":
+	     cpsThreshold := 10  ; Threshold for CPS for Slokdarm plaveiselcelcarcinoom
+	     tpsThreshold := 1  ; Threshold for TPS for Slokdarm plaveiselcelcarcinoom
+	     cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Pembrolizumab bedraagt de cut-off waarde > of = 10."
+	     tpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 1%."
+	case "Slokdarm-maag Adenocarcinoom":
             cpsThreshold := 5  ; Threshold for CPS for Slokdarm-maag Adenocarcinoom
-            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen and immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 5."
-        case "Long":
-            tpsThreshold := 1  ; Threshold for TPS for Long
-            tpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor eerstelijnsbehandeling met Pembrolizumab/ Cemiplimab bedraagt de cut-off waarde > of = 50%. Voor eerstelijnsbehandeling met Durvalumab bedraagt de cut-off waarde > of = 1%. Voor tweedelijnsbehandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1%."
-    }
+            cpsInterpretatie := "Combined positivity score (CPS): het percentage PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score). Voor behandeling met Nivolumab bedraagt de cut-off waarde > of = 5."
+	case "Long":
+    	tpsThreshold := 1  ; Threshold for TPS for long
+    	tpsInterpretatie := "Tumor Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage). Voor eerstelijnsbehandeling met Pembrolizumab/ Cemiplimab bedraagt de cut-off waarde > of = 50%. Voor eerstelijnsbehandeling met Durvalumab bedraagt de cut-off waarde > of = 1%. Voor tweedelijnsbehandeling met Pembrolizumab bedraagt de cut-off waarde > of = 1 %."
+		}
 
-    ; Check if the entered scores are numbers
-    if IsNumber(cpsScore) {
-        cpsScore := Round(cpsScore) ; Round the entered CPS score to an integer
-    } else {
-        cpsScore := 0 ; Set it to a default value or handle as needed
-    }
-
-    if IsNumber(tpsScore) {
-        tpsScore := Round(tpsScore) ; Round the entered TPS score to an integer
-    } else {
-        tpsScore := 0 ; Set it to a default value or handle as needed
-    }
-
-    ; Check if CPS is positive
-    if (scoreType = "CPS") {
-        if (cpsScore >= cpsThreshold) {
-            resultaat := "CPS is positief"
+	 ; Check if CPS is positive
+if (ScoreEditCPS.Enabled and CPS_Score != "") {
+    if (IsNumber(CPS_Score)) {
+        CPS_Score := Round(CPS_Score) ; Round the entered score to an integer
+        if (CPS_Score >= cpsThreshold) {
+            resultaatCPS := "positief"
         } else {
-            resultaat := "CPS is negatief"
+            resultaatCPS := "negatief"
         }
-        explanation := cpsInterpretatie
-    }
-    ; Check if TPS is positive
-    else if (scoreType = "TPS") {
-        if (tpsScore >= tpsThreshold) {
-            resultaat := "TPS is positief"
-        } else {
-            resultaat := "TPS is negatief"
-        }
-        explanation := tpsInterpretatie
-    }
-
-    ; Include the external controls status in the HTML
-    if (externalControlsOK = "OK") {
-        externalControlsStatus := "Externe/interne controles zijn opgegaan"
+        explanation .= cpsInterpretatie
     } else {
-        externalControlsStatus := "Externe/interne controles zijn niet opgegaan"
+        return "Invalid CPS score. Please enter a number."
     }
-
-    ; Return the explanation using ByRef
-    explanation := explanation
-
-    ; Generate the HTML output 
-    html := "<b><u>Aanvullende immuunhistochemie voor PD-L1 (<@DATE@>/<@USERLONG@>):</u></b><br>"
-    html .= "<b>Orgaan:</b> " organ "<br>"
-    html .= "<b>Techniek:</b> uitgevoerd met 22C3 antilichaam (Agilent) op het Benchmark Ultra toestel (Roche).<br>"
-    html .= "<b>Score Type:</b> " scoreType "<br>"
-    html .= "<b>Interpretatie:</b> " explanation "<br>"
-    html .= "<b>Externe/interne controle:</b> " externalControlsStatus "<br>"
-    html .= "<b>PD-L1 Score (22C3, Agilent):</b> " scoreType " " cpsScore " (dit komt overeen met een " resultaat " resultaat)<br>"
-
-; Include both CPS and TPS scores in the HTML when required
-if (organ = "Blaas" || organ = "Slokdarm plaveiselcelcarcinoom") {
-    html .= "<b>PD-L1 Score (22C3, Agilent):</b> " . tpsScore . "% (overeenstemmend met een " . resultaat . " resultaat)<br>"
-}
-; Include TPS score in the HTML for "Long"
-if (organ = "Long") {
-    html .= "- PD-L1 (22C3 Agilent) " . tpsScore . "% (overeenstemmend met een " . resultaat . " resultaat)<br>"
 }
 
-return html
+; Check if TPS is positive
+if (ScoreEditTPS.Enabled and TPS_Score != "") {
+    if (IsNumber(TPS_Score)) {
+        TPS_Score := Round(TPS_Score) ; Round the entered score to an integer
+        if (TPS_Score >= tpsThreshold) {
+            resultaatTPS := "positief"
+        } else {
+            resultaatTPS := "negatief"
+        }
+        if explanation != ""
+            explanation .= "<br>"
+        explanation := explanation . tpsInterpretatie
+    } else {
+        return "Invalid TPS score. Please enter a number."
+    }
 }
 
+        ; Include the external controls status in the HTML
+        if (externalControlsOK) {
+            externalControlsStatus := "Externe/interne controles zijn conform de vooropgestelde criteria."
+        } else {
+            externalControlsStatus := "Externe/interne controles zijn niet conform de vooropgestelde criteria."
+        }
+
+        ; Generate the HTML output 
+		if (organ = "Long") {
+			html := "<b>Immuunhistochemie voor PD-L1 (" FormatTime(,"dd/MM/yyyy") ";" Patholoog.Text ")" "</b><br>"
+			html .= "<b>Locatie:</b> " organ "<br>"
+			html .= "<b>Techniek:</b> uitgevoerd met 22C3 antilichaam (Agilent) op het Benchmark Ultra toestel (Roche).<br>"
+			html .= "<b>Interpretatie:</b> " explanation "<br>"
+			html .= "<b>Externe/interne controle:</b> " externalControlsStatus "<br>"
+			html .= "<b>PD-L1 Score (22C3, Agilent):</b><br>"
+			html .= "- TPS = " . TPS_Score . "%.<br>"
+		} else {
+		html := "<b>Immuunhistochemie voor PD-L1 (" FormatTime(,"dd/MM/yyyy") ";" Patholoog.Text ")" "</b><br>"
+		html .= "<b>Locatie:</b> " organ "<br>"
+		html .= "<b>Techniek:</b> uitgevoerd met 22C3 antilichaam (Agilent) op het Benchmark Ultra toestel (Roche).<br>"
+		html .= "<b>Interpretatie:</b> " explanation "<br>"
+		html .= "<b>Externe/interne controle:</b> " externalControlsStatus "<br>"
+		html .= "<b>PD-L1 Score (22C3, Agilent):</b> <br>" 
+		if ScoreEditCPS.Enabled
+			html .= "- CPS = " CPS_Score ". Dit komt overeen met een " resultaatCPS " resultaat. <br>"
+		if ScoreEditTPS.Enabled
+			html .= "- TPS = " . TPS_Score . "%. Dit komt overeen met een " . resultaatTPS . " resultaat. <br>"
+		return html
+    }
+}
+}
+}
 ::*41::
 {	; Colonresectie
 	aw := WinExist("A")
