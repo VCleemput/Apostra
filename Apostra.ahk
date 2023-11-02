@@ -14,7 +14,7 @@ SendHTML(html, aw := WinExist("A"))
 	wc := Winclip()
 	html := '<div style="font-size:10pt">' html  '</div>'
 	;OldClipboard := WinClip.Snap() ;om de een of andere reden werkt 'm zonder dit niet in WORD
-	OldClipboard := A_Clipboard
+	OldClipboard := ClipboardAll()
 	A_Clipboard :=""
 	wc.Clear()
 	Sleep(100)
@@ -526,7 +526,7 @@ _PDL1ButtonOK(*)
 	MyGui.AddText("xs section w200", "Gradering")
 	gradering := MyGui.AddDDL("ys w200 Choose1", ["1","2","3","niet van toepassing"])
 	MyGui.AddText("xs section w200", "Invasiediepte")
-	invasiediepte := MyGui.AddDDL("ys w200 Choose1",["intramucosaal adenocarcinoom", "submucosa", "muscularis propria", "subserosa", "adventitia", "serosa, met serosale doorbraak"])
+	invasiediepte := MyGui.AddCombobox("ys w200 Choose1",["intramucosaal adenocarcinoom", "submucosa", "muscularis propria", "subserosa", "adventitia", "serosa, met serosale doorbraak"])
 	MyGui.AddText("xs section w200", "LVI")
 	lvi := MyGui.AddComboBox("ys w200 Choose1", ["afwezig","aanwezig"])
 	MyGui.AddText("xs section w200", "PNI")
@@ -580,7 +580,7 @@ _toggleNACT(*)
 _41ButtonOK(*)
 {
 	if InStr("submucosa , muscularis propria , subserosa, adventitia, serosa, met serosale doorbraak", invasiediepte.text)
-		invasiedieptetext := "Invasief tot in de " . invasiediepte.text . "."
+		invasiediepte.text := "Invasief tot in de " . invasiediepte.text . "."
 	if (gradering.text == "niet van toepassing")
 		graderingbesluit := ", gradering niet van toepassing."
 	Else
@@ -602,7 +602,7 @@ _41ButtonOK(*)
 		"Invasief carcinoom: <br>"
 		"-Histologisch type (op basis van WHO classificatie): " . typeCarcinoom.text . "<br>"
 		"-Histologische gradering: graad " gradering.text "<br>"
-		"-Invasiediepte: " invasiedieptetext "<br>"
+		"-Invasiediepte: " invasiediepte.text "<br>"
 		"-Lymfovasculaire invasie: " . lvi.text . "<br>"
 		"-Perineurale invasie: " . pni.text . "<br>"
 		dvorakmic
