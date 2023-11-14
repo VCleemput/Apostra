@@ -18,9 +18,13 @@ SendHTML(html, aw := WinExist("A"))
 	A_Clipboard :=""
 	wc.Clear()
 	Sleep(100)
-	wc.SetHTML(html)
-	ClipWait(,1)
 	wc.SetText(html)
+	wc.SetHTML(html)
+	if A_Clipboard = ""
+		{
+		wc.SetText(html)
+		wc.SetHTML(html)
+		}
 	Sleep(100)
 	ClipWait(,1)
 	backup := html
@@ -293,7 +297,7 @@ SendHTML(synopsis)
 	graderingtekst := MyGUI.AddText("xm+30 section w200 Disabled", "Gradering")
 	graderingCis := MyGUI.AddComboBox("ys w200 Disabled Choose2", ["graad 1","graad 2","graad 3"])
 	groeipatroontekst := MyGUI.AddText("xm+30 section w200 Disabled", "Groeipatroon")
-	groeipatroon := MyGUI.AddListBox("ys w200 r7 Multi Disabled", ["cribriform","solied","papillair","comedo","clinging","pagetoid","uitbreidend in adenosis"])
+	groeipatroon := MyGUI.AddListBox("ys w200 r7 Multi Disabled Choose1", ["cribriform","solied","papillair","comedo","clinging","pagetoid","uitbreidend in adenosis"])
 	MyGUI.AddText("xm section w200 h20", "Tumorload")
 	tumorload := MyGUI.AddEdit("ys w200", "")
 	MyGUI.AddText("xm section w200 h20", "LVI")
