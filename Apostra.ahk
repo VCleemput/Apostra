@@ -60,94 +60,43 @@ return
 	aw := WinExist("A") ; captures the current window, so at the end the text is pasted in the same window
 	global synopsis ; a value to store the synopsis, to be passed to the next function
 	MyGui := Gui(, "Farmacodiagnostiek borst") ; create GUI
-	ERCheck := MyGui.AddCheckbox("xm vReceptorER Checked", "ER")
-	ERCheck.OnEvent("Click", ER)
+	StaalTekst := MyGui.AddText("xm section vtekstStaal", "Staaltype")
+	Staal := MyGui.AddDDL("ys wp Choose1",["CNB", "Operatiespecimen", "Andere:"] )
+	ERCheck := MyGui.AddCheckbox("xm section vReceptorER Checked", "ER")
+	ERCheck.OnEvent("Click", _toggleqs)
 	ERpctTekst := MyGui.AddText("xm section vtekstER", "Percentage gekleurde kernen")
 	ERpct := MyGui.AddEdit("ys wp", "")
 	ERintTekst := MyGui.AddText("xm section vtekstIntER", "Intensiteit aankleuring")
 	ERint := MyGui.AddDDL("ys wp Choose4",["afwezig", "zwak", "matig", "sterk"] )
 	PRCheck := MyGui.AddCheckbox("xm vReceptorPR Checked", "PR")
-	PRCheck.OnEvent("Click", PR)
+	PRCheck.OnEvent("Click", _toggleqs)
 	PRpctTekst := MyGui.AddText("xm section vtekstPR", "Percentage gekleurde kernen")
 	PRpct := MyGui.AddEdit("ys wp", "")
 	PRintTekst := MyGui.AddText("xm section vtekstIntPR", "Intensiteit aankleuring")
 	PRint := MyGui.AddDDL("ys wp Choose4",["afwezig", "zwak", "matig", "sterk"] )
 	HER2Check := MyGui.AddCheckbox("xm section vHER2R Checked", "HER2")
-	HER2Check.OnEvent("Click", HER2)
+	HER2Check.OnEvent("Click", _toggleqs)
 	HER2ind := MyGui.AddDDL("ys wp Choose1", ["borst", "maag", "andere"])
-	HER2ihcTekst := MyGui.AddText("xm section vtekstHER2", "IHC score (zonder +)")
-	HER2ihc := MyGui.AddEdit("ys wp", "")
+	HER2ihcTekst := MyGui.AddText("xm section vtekstHER2", "IHC score")
+	HER2ihc := MyGui.AddDDL("ys w200 Choose1", ["HER2 negatief (score 0)", "HER2 negatief (score 1+)", "HER2 equivocal (score 2+)", "HER2 positief (score 3+)"])
 	kiCheck := MyGui.AddCheckbox("xm vki Checked", "Ki67")
-	kiCheck.OnEvent("Click", ki)
+	kiCheck.OnEvent("Click", _toggleqs)
 	kiscoreTekst := MyGui.AddText("xm section vtekstki", "Ki67-index (zonder %)")
 	kiscore := MyGui.AddEdit("ys wp", "")
 	MyGui.AddText("section xm", "Nota: na de sneltekst kan een synopsis geplakt worden met 'Win+s'")
 	MyGui.AddButton("xm default", "OK").OnEvent("Click", _qsButtonOK)
 	MyGui.Show()
 
-ER(*) ; Do this when ER is checked
+_toggleqs(*)
 {
-	if ERCheck.value = 1
+	checks := [ERCheck, PRCheck, HER2Check, kiCheck]
+	params := [[ERint, ErintTekst, ERpct, ERpctTekst], [PRint, PRintTekst, PRpct, PRpctTekst], [HER2ihc, HER2ind, HER2ihcTekst], [kiscore, kiscoreTekst]]
+	for i, check in checks
 		{
-			ERint.Enabled := 1
-			ERintTekst.Enabled := 1
-			ERpct.Enabled := 1
-			ERpctTekst.Enabled := 1
-		}
-	if ERCheck.value = 0
-		{
-			ERint.Enabled := 0
-			ERintTekst.Enabled := 0
-			ERpct.Enabled := 0
-			ERpctTekst.Enabled := 0
-		}
-}
-	
-PR(*)
-{
-	if PRCheck.value = 1
-		{
-			PRint.Enabled := 1
-			PRintTekst.Enabled := 1
-			PRpct.Enabled := 1
-			PRpctTekst.Enabled := 1
-		}
-	if PRCheck.value = 0
-		{
-			PRint.Enabled := 0
-			PRintTekst.Enabled := 0
-			PRpct.Enabled := 0
-			PRpctTekst.Enabled := 0
-		}
-	}
-
-HER2(*)
-{
-	if HER2Check.value = 1
-		{
-			HER2ihc.Enabled := 1
-			HER2ind.Enabled := 1
-			HER2ihcTekst.Enabled := 1
-		}
-	if HER2Check.value = 0
-		{
-			HER2ihc.Enabled := 0
-			HER2ind.Enabled := 0
-			HER2ihcTekst.Enabled := 0
-		}
-}
-
-ki(*)
-{
-	if kiCheck.value = 1
-		{
-			kiscoreTekst.Enabled := 1
-			kiscore.Enabled := 1
-		}
-	if kiCheck.value = 0
-		{
-			kiscoreTekst.Enabled := 0
-			kiscore.Enabled := 0
+			for j in params[i]
+				{
+					j.Enabled := check.value
+				}
 		}
 }
 	
@@ -179,18 +128,44 @@ _qsButtonOK(*)
 			return
 		value := I[Int]
 		qs := value + Pe
+		allredTekst := "Allred score " Pe " + " value " = " qs "/8."
 		if ((Pct = "< 1"))
-			waarde := "Negatief"
+			waarde := "Negatief (minder dan 1% nucleaire positiviteit)."
 		else if Pct < 1
-			waarde := "Negatief"
+			waarde := "Negatief (minder dan 1% nucleaire positiviteit)."
 		else if Pct <=10
-			waarde := "Zwak positief"
+			waarde := "Gering positief (1-10%)."
 		else
-			waarde := "Positief"
+			{
+				waarde := "Positief (>10%)."
+				PctTekst := ""
+				if Pct >= 11 and Pct <= 20
+					PctTekst := "11-20%"
+				else if Pct >= 21 and Pct <= 30
+					PctTekst := "21-30%"
+				else if Pct >= 31 and Pct <= 40
+					PctTekst := "31-40%"
+				else if Pct >= 41 and Pct <= 50
+					PctTekst := "41-50%"
+				else if Pct >= 51 and Pct <= 60
+					PctTekst := "51-60%"
+				else if Pct >= 61 and Pct <= 70
+					PctTekst := "61-70%"
+				else if Pct >= 71 and Pct <= 80
+					PctTekst := "71-80%"
+				else if Pct >= 81 and Pct <= 90
+					PctTekst := "81-90%"
+				else if Pct >= 91 and Pct <= 100
+					PctTekst := "91-100%"
+				waarde .= " " . PctTekst . " kleurt " . Int . " aan."
+	
+			}
 		if (Pe = 0 or value = 0)
-			tekst := "Negatief. Allred score 0/8. Geen aankleuring in de laesionele cellen."
-		else
-			tekst := waarde ". " Pct " pct van de kernen kleurt " Int  " aan. Allred score " Pe " + " value " = " qs "/8."
+			{
+				tekst := "Negatief. Geen aankleuring in de laesionele cellen."
+				allredTekst := "Allred score 0/8."
+			}
+		tekst := waarde . " " . allredTekst
 		return tekst
 	}
 
@@ -214,7 +189,7 @@ _qsButtonOK(*)
 	if ERCheck.value = 1
 	{
 		w := QuickScore(ERpct.text, ERint.text)
-		ReceptortekstER := "Oestrogeenreceptor (ER): " w "<br>"
+		ReceptortekstER := "Resultaat ER (" . Staal.text . "): " w "<br>"
 		ABtekstER := ab_ER . ", "
 		RegExMatch(w, "\d\/8", &z)
 		synopsis := synopsis . "ER " . z[] . "; "
@@ -222,7 +197,7 @@ _qsButtonOK(*)
 	if PRCheck.value = 1
 	{
 		w := QuickScore(PRpct.text, PRint.text)
-		ReceptortekstPR := "Progesteronreceptor (PR): " w "<br>"
+		ReceptortekstPR := "Resultaat PR (" . Staal.text . "): " w "<br>"
         ABtekstPR := ab_PR . ", "
 		RegExMatch(w, "\d\/8", &z)
 		synopsis := synopsis . "PR " . z[] . "; "
@@ -241,15 +216,16 @@ _qsButtonOK(*)
 				ASCOjaar := ASCO_jaar_rest
 			}
 			SishVraagTekst := ""
-			if (((HER2ind.text = "borst") or (HER2ind.text = "maag")) and ((HER2ihc.text = 2) or (HER2ihc.text = 3))) {
+			if (((HER2ind.text = "borst") or (HER2ind.text = "maag")) and ((HER2ihc.value = 3) or (HER2ihc.value = 4))) {
 				SishVraagTekst := " ISH volgt."
 			}
 			HER2tekst := 
 			(
-				"HER2 IHC score: " HER2ihc.text  "+. " SishVraagTekst "<br>"
+				"Resultaat HER2-IHC (" Staal.text "): " HER2ihc.text  ". " SishVraagTekst "<br>"
 				"<small>" . ab_HER2 . " op " . stainer . ". Interpretatie volgens de ASCO/CAP guidelines " ASCOjaar ".</small><br><br>"
 			)
-			synopsis := synopsis . "HER2 IHC score: " . HER2ihc.text . "+; "
+			RegExMatch(HER2ihc.text, "\d\+", &h)
+			synopsis := synopsis . "HER2 IHC score: " . h[] . "; "
 		}
 	if kiCheck.value = 1
 		{
@@ -258,6 +234,7 @@ _qsButtonOK(*)
 		}
 	tekst :=
 (
+	"<b>Farmacodiagnostiek:</b><br>"
 	ReceptortekstER
 	ReceptortekstPR
 	ABtekst
