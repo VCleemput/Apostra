@@ -502,12 +502,21 @@ _PDL1ButtonOK(*)
 {	; Colonresectie
 	aw := WinExist("A")
 	MyGui := Gui(, "Colonresectie")
-	MyGui.AddText("section w200", "Type")
+	MyGui.AddText("section w200", "Specimen")
+	specimen := MyGui.AddComboBox("ys w200 Choose1", ["Partiële colectomie", "Lokale excisie", "TME", "APRA"])
+	specimen.OnEvent("change", _toggle)
+	MyGui.AddText("xs section w200", "Locatie")
+	locatie := MyGui.AddComboBox("ys w200 Choose1", ["distaal colon", "colon transversum", "colon ascendens", "caecum", "sigmoid", "rectum", "locatie niet gegeven"])
+	locatie.OnEvent("change", _toggle)
+	MyGui.AddText("xs section w200", "Type")
 	typeCarcinoom := MyGui.AddComboBox("ys w200 Choose1", ["adenocarcinoom NST","mucineus adenocarcinoom","zegelringcelcarcinoom","neuroendocrien carcinoom","plaveiselcelcarcinoom"])
 	MyGui.AddText("xs section w200", "Gradering")
 	gradering := MyGui.AddDDL("ys w200 Choose1", ["1","2","3","niet van toepassing"])
 	MyGui.AddText("xs section w200", "Invasiediepte")
 	invasiediepte := MyGui.AddCombobox("ys w200 Choose1",["intramucosaal adenocarcinoom", "submucosa", "muscularis propria", "subserosa", "adventitia", "serosa, met serosale doorbraak"])
+	invasiediepte.OnEvent("change", _toggle)
+	smTekst := MyGui.AddText("xs section w200", "Kikuchi")
+	sm := MyGui.AddDDL("ys w200 Choose1", ["sm1","sm2", "sm3"])
 	MyGui.AddText("xs section w200", "LVI")
 	lvi := MyGui.AddComboBox("ys w200 Choose1", ["afwezig","aanwezig"])
 	MyGui.AddText("xs section w200", "PNI")
@@ -516,17 +525,14 @@ _PDL1ButtonOK(*)
 	sv := MyGui.AddComboBox("ys w200 Choose1", ["tumorvrij","positief"])
 	MyGui.AddText("xs section w200", "Budding")
 	budding := MyGui.AddComboBox("ys w200 Choose1", ["afwezig","aanwezig: beperkt","aanwezig: matig","aanwezig:uitgesproken"])
-	MyGui.AddText("xs section w200", "Extramurale deposits")
+	extramuraleDepositsTekst := MyGui.AddText("xs section w200", "Extramurale deposits")
 	extramuraleDeposits := MyGui.AddComboBox("ys w200 Choose1", ["afwezig","aanwezig"])
-	MyGui.AddText("xs section w200", "Totaal # LK")
+	totaalLkTekst := MyGui.AddText("xs section w200", "Totaal # LK")
 	totaalLk := MyGui.AddEdit("ys w200", "")
-	MyGui.AddText("xs section w200", "# Positieve LK")
+	positiefLkTekst := MyGui.AddText("xs section w200", "# Positieve LK")
 	positiefLk := MyGui.AddEdit("ys w200", "")
 	MyGui.AddText("xs section w200", "Precursorletsel")
 	precursorLetsel := MyGui.AddEdit("ys w200", "Niet aantoonbaar")
-	MyGui.AddText("xs section w200", "Specimen")
-	specimen := MyGui.AddComboBox("ys w200 Choose1", ["distaal colon", "colon transversum", "colon ascendens", "caecum", "sigmoid", "rectum", "locatie niet gegeven"])
-	specimen.OnEvent("change", _togglerectum)
 	MyGui.AddText("xs section w200", "Diameter tumor(mm)")
 	diameter := MyGui.AddEdit("ys w200", "")
 	MyGui.AddText("xs section w200", "Afstand snedevlak(cm)")
@@ -537,37 +543,38 @@ _PDL1ButtonOK(*)
 	tnm := MyGui.AddEdit("ys w200", "")
 	MyGui.AddText("xs section w200", "NACT?")
 	chemoCheckBox := MyGui.AddCheckbox("ys  w200", "")
-	chemoCheckBox.OnEvent("click", _toggleNACT)
+	chemoCheckBox.OnEvent("click", _toggle)
 	MyGui.AddText("xs section w100", "Dvorak Regression")
 	dvorak := MyGui.AddDDL("ys w300 R4 Choose1", ["GR 4: geen tumorcellen, louter fibrose (= complete respons)", "GR 3: klein aantal tumor cellen (moeilijk te vinden met de microscoop op kleine vergroting) in een dominant fibrotisch stroma", "GR 2: klein aantal tumor cellen (makkelijk te vinden met de microscoop op kleine vergroting) in een dominant fibrotisch stroma", "GR 1: de tumor domineert op de fibrotische massa ", "GR 0: geen regressie"])
 	MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _41ButtonOK)
-	_togglerectum()
-	_toggleNACT()
+	_toggle()
 	MyGui.Show()
 	
 
 
-_togglerectum(*)
+_toggle(*)
 {
-	crmTekst.Enabled := (specimen.text == "rectum")
-	crm.Enabled := (specimen.text == "rectum")
-}
-
-_toggleNACT(*)
-{
+	if specimen.text == "APRA" or specimen.text == "TME"
+		locatie.text := "rectum"
+	for i in [extramuraleDeposits, extramuraleDepositsTekst, totaalLk, totaalLkTekst, positiefLk, positiefLkTekst]
+		i.Enabled := (specimen.text !== "Lokale excisie")
+	sm.Enabled := ((invasiediepte.text == "submucosa") and (specimen.text == "Lokale excisie") and (locatie.text == "rectum"))
+	smTekst.Enabled := sm.Enabled
+	crmTekst.Enabled := ((locatie.text == "rectum") and (specimen.text != "Lokale excisie"))
+	crm.Enabled := crmTekst.Enabled
 	dvorak.Enabled := (chemoCheckBox.value)
 }
 
 _41ButtonOK(*)
 {
 	if InStr("submucosa , muscularis propria , subserosa, adventitia, serosa, met serosale doorbraak", invasiediepte.text)
-		invasiediepte.text := "Invasief tot in de " . invasiediepte.text . "."
+		invasiediepte.text := "Invasief tot in de " . invasiediepte.text 
 	if (gradering.text == "niet van toepassing")
 		graderingbesluit := ", gradering niet van toepassing."
 	Else
 		graderingbesluit := ", graad " . gradering.text . "."  
 
-	if (crm.text != "") && (specimen.text == "rectum")
+	if (crm.text != "") && (locatie.text == "rectum")
 		crm.text := "-Circumferentiele resectiemarge: " . crm.text " mm.<br>"
 	dvorakbes := ""
 	dvorakmic := ""
@@ -576,26 +583,34 @@ _41ButtonOK(*)
 			dvorakmic := "-Rectal cancer regression grade (RCRG) na therapie (volgens Dworak et al, 1997):" . dvorak.text . "<br>"
 			dvorakbes := "-Dvorak cancer regression grade (DCRG): " SubStr(dvorak.text, 1, 4) ".<br>"
 		}
-	
+	resectieTekst := ""	
+	lkTekst := ""
+	if extramuraleDeposits.Enabled
+		{
+			resectieTekst := "-Extramurale deposits: " . extramuraleDeposits.text . "<br>"
+			lkTekst := "-Lymfeklieren: " . totaalLk.text . " lymfeklieren gepreleveerd, waarvan " . positiefLk.text . " positief.<br>"
+		}
+	smbesluit := ""
+	if sm.Enabled
+		smbesluit := ", Kikuchi level " . sm.text . "."
 	html := 
 	(
 		"<b>Microscopie:</b><br>"
-		"Invasief carcinoom: <br>"
 		"-Histologisch type (op basis van WHO classificatie): " . typeCarcinoom.text . "<br>"
 		"-Histologische gradering: graad " gradering.text "<br>"
-		"-Invasiediepte: " invasiediepte.text "<br>"
+		"-Invasiediepte: " . invasiediepte.text . smbesluit . "<br>"
 		"-Lymfovasculaire invasie: " . lvi.text . "<br>"
 		"-Perineurale invasie: " . pni.text . "<br>"
 		dvorakmic
 		"-Chirurgische snedevlakken (proximaal & distaal): " . sv.text . "<br>"
 		crm.text
 		"-Tumor budding: " . budding.text . "<br>"
-		"-Extramurale tumordeposits: " . extramuraleDeposits.text . "<br>"
-		"-Lymfeklieren: " . totaalLk.text . " lymfeklieren gepreleveerd, waarvan " . positiefLk.text . " positief.<br>"
+		resectieTekst
+		lkTekst
 		"-Precursorletsel: " . precursorLetsel.text . "<br>"
 		"<br>"
 		"<b>Besluit:</b><br>"
-		"Partiele colectomie (" . specimen.text . "):<br>"
+		specimen.text . " (" . locatie.text . "):<br>"
 		"-Op " . afstandSnedevlak.text . " cm van het dichtst bijgelegen snedevlak: tumoraal letsel met maximale diameter van " . diameter.text . " mm.<br>"
 		"-Microscopisch overeenstemmend met een " . typeCarcinoom.text . graderingbesluit . "<br>"
 		"-Invasiediepte: " . invasiediepte.text . "<br>"
@@ -603,7 +618,7 @@ _41ButtonOK(*)
 		dvorakbes
 		"-Snedevlakken (proximaal & distaal): " . sv.text . "<br>"
 		crm.text
-		"-Lymfklieren: " . totaalLk.text . " lymfeklieren gepreleveerd, waarvan " . positiefLk.text . " positief.<br>"
+		lkTekst
 		"-Voorstel tot stadiëring (volgens TNM8): " . tnm.text . "<br>"
 	)
 	SendHTML(html,aw)
