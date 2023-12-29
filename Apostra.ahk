@@ -224,8 +224,8 @@ _qsButtonOK(*)
 				"Resultaat HER2-IHC (" Staal.text "): " HER2ihc.text  ". " SishVraagTekst "<br>"
 				"<small>" . ab_HER2 . " op " . stainer . ". Interpretatie volgens de ASCO/CAP guidelines " ASCOjaar ".</small><br><br>"
 			)
-			RegExMatch(HER2ihc.text, "\d\+", &h)
-			synopsis := synopsis . "HER2 IHC score: " . h[] . "; "
+			RegExMatch(HER2ihc.text, " \d", &h)
+			synopsis := synopsis . "HER2 IHC score:" . h[] . "; "
 		}
 	if kiCheck.value = 1
 		{
