@@ -345,7 +345,9 @@ _69pbButtonOK(*){
 		komma := ""
 		textCISbesluit := ""
 	}
-
+	tumorloadhtml := ""
+	if tumorload.text != ""
+		tumorloadhtml := "Tumorload: " tumorload.text "% tumorcel op totale weefseloppervlak.<br>"
 	html :=
 	(
 		"<b>Maligne veranderingen:</b><br>"
@@ -354,7 +356,7 @@ _69pbButtonOK(*){
 		"-Kernpleiomorfie: score " kern.value "<br>"
 		"-Mitosetelling: score " mitose.value "<br><br>"
 		"In situ carcinoom: " cis " " graderingCis.text " " typeCismicro komma groeipatroon "<br><br>"
-		"Tumorload: " tumorload.text "% tumorcel oppervlak op totale weefseloppervlak.<br>"
+		tumorloadhtml
 		"Lymfovasculaire invasie: " lvi ".<br>"
 		"Perineurale invasie: " pni ".<br>"
 		"Necrose: " necrose ".<br>"
