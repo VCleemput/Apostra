@@ -464,34 +464,63 @@ IniListRead(path, section, key)
 {	;PD-L1
 	aw := WinActive("A")
 	MyGui := Gui(,"PD-L1")
-	interpretatie_tekst := MyGui.AddText("xm section w200", "Interpretatie")
-	interpretatie := MyGui.AddDDL("ys w200 Choose1", ["CPS", "TPS", "IC"])
-	score_tekst := MyGui.AddText("xm section w200", interpretatie.text . "-score")
-	score := MyGui.AddEdit("ys w200", )
-	interpretatie.OnEvent("change", (*) => (score_tekst.text := interpretatie.text . "-score"))
-	techniek_tekst := MyGui.AddText("xm section w200", "Techniek")
+	TPSCheck := MyGui.AddCheckbox("xm section Checked", )
+	TPSCheck.OnEvent("Click", _togglepd)
+	TPSScoreTekst := MyGui.AddText("ys section vtekstTPS", "TPS")
+	TPSScore := MyGui.AddEdit("ys ", )
+	CPSCheck := MyGui.AddCheckbox("xm section", )
+	CPSCheck.OnEvent("Click", _togglepd)
+	CPSScoreTekst := MyGui.AddText("ys section vtekstCPS", "CPS")
+	CPSScore := MyGui.AddEdit("ys ", )
+	ICCheck := MyGui.AddCheckbox("xm section", )
+	ICCheck.OnEvent("Click", _togglepd)
+	ICTekst := MyGui.AddText("ys section vtekstIC", "IC")
+	ICScore := MyGui.AddEdit("ys ", )
+	techniek_tekst := MyGui.AddText("xm section w50", "Techniek")
 	techniek := MyGui.AddCombobox("ys w200 Choose1", IniListRead("lab-variables.ini", "PD-L1", "techniek"))
-	toestel_tekst := MyGui.AddText("xm section w200", "Toestel")
+	toestel_tekst := MyGui.AddText("xm section w50", "Toestel")
 	toestel := MyGui.AddCombobox("ys w200 Choose1", IniListRead("lab-variables.ini", "PD-L1", "toestel"))
+	checks := [TPSCheck, CPSCheck, ICCheck]
+	params := [[TPSScore, TPSScoreTekst], [CPSScore, CPSScoreTekst], [ICScore, ICTekst]]
+	_togglepd
 	MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _PDL1ButtonOK)
 	MyGui.Show("AutoSize")
+
+	_togglepd(*)
+	{
+		for i, check in checks
+			{
+				
+				for j in params[i]
+					{
+						j.Enabled := check.value
+					}
+			}
+	}
 
 _PDL1ButtonOK(*)
 {
 	html := "<b><u>Resultaat PD-L1 IHC analyse</u></b><br>"
 	html .=	"Techniek: uitgevoerd met " . techniek.text . " op " . toestel.text . ".<br>"
 	html .= "Interpretatie PD-L1: "
-	if interpretatie.text = "CPS"
+	if CPSCheck.value = 1
 		html .= "Combined positivity score (CPS): het aantal PD-L1 aankleurende cellen (tumorcellen en immuuncellen) gedeeld door het totaal aantal viabele tumorcellen x 100 (= score).<br>"
-	if interpretatie.text = "TPS"
+	if TPSCheck.value = 1
 		html .= "Tumour Proportion Score (TPS): het aantal PD-L1 aankleurende tumorcellen gedeeld door het totaal aantal viabele tumorcellen (= percentage).<br>"
-	if interpretatie.text = "IC"
+	if ICCheck.value = 1
 		html .= "Immune cell area (IC): gebied ingenomen door het PD-L1 aankleurende immuuncellen gedeeld door het totale tumorgebied x 100 (= percentage).<br>"
-	html.= "<b>Besluit PD-L1 analyse (" . techniek.text . "): </b>"
-	html .= interpretatie.text . " = " . score.text
-	if interpretatie.text != "CPS"
-		html .= "%"
-	html.= ".<br>"
+	
+	for i, c in checks
+		{
+			if c.value = 1
+				{
+					html.= "<b>Besluit PD-L1 analyse</b> (" . techniek.text . "): "
+					html .= params[i][2].text . " = " . params[i][1].text 
+					if c != CPSCheck
+						html .= "%"
+					html .= "<br>"
+				}
+		}
 	accreditatie := IniRead("lab-variables.ini", "PD-L1", "accreditatie") 
 	if accreditatie != ""
 		html .= "<small>" . accreditatie . "</small><br>"
