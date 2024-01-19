@@ -177,6 +177,7 @@ _qsButtonOK(*)
 	HER2tekst :=""
 	kitekst :=""
 	synopsis :=""
+	acc :=""
 
     stainer := IniRead("lab-variables.ini", "breast fd","stainer")
     ab_ER := IniRead("lab-variables.ini", "breast fd","ab_ER")
@@ -193,6 +194,7 @@ _qsButtonOK(*)
 		ABtekstER := ab_ER . ", "
 		RegExMatch(w, "\d\/8", &z)
 		synopsis := synopsis . "ER " . z[] . "; "
+		acc .= "ER"
 	}
 	if PRCheck.value = 1
 	{
@@ -201,6 +203,9 @@ _qsButtonOK(*)
         ABtekstPR := ab_PR . ", "
 		RegExMatch(w, "\d\/8", &z)
 		synopsis := synopsis . "PR " . z[] . "; "
+		if acc
+			acc .= ", "
+		acc .= "PR"
 	}
 
 	if ((ERCheck.value = 1) or (PRCheck.value = 1))
@@ -226,12 +231,21 @@ _qsButtonOK(*)
 			)
 			RegExMatch(HER2ihc.text, " \d", &h)
 			synopsis := synopsis . "HER2 IHC score:" . h[] . "; "
+			if acc
+				acc .= ", "
+			acc .= "HER2"
 		}
+	acctekst := IniRead("lab-variables.ini", "breast fd", "accreditatie","")
+	if acc
+		acc := "<small>" . acc . acctekst . "<br><br></small>"
+		
 	if kiCheck.value = 1
 		{
 			kitekst := "Ki67-index: " kiscore.text "%.<br>"
 			synopsis := synopsis . "ki67: " . kiscore.text . "%"
 		}
+	
+		
 	tekst :=
 (
 	"<b>Farmacodiagnostiek:</b><br>"
@@ -239,6 +253,7 @@ _qsButtonOK(*)
 	ReceptortekstPR
 	ABtekst
 	HER2tekst
+	acc
 	kitekst
 )
 	SendHTML(tekst, aw)
