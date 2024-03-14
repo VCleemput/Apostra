@@ -284,10 +284,12 @@ SendHTML(synopsis)
 	MyGUI.AddText("xm w200 section", "CIS")
 	CIS := MyGUI.AddCheckbox("ys", "CIS?")
 	CIS.OnEvent("Click", _CISButton)
+	CIS.OnEvent("Click", _CIStypeButton)
 	typeCistekst := MyGUI.AddText("xm+30 section w200 Disabled", "Type CIS")
 	typeCis := MyGUI.AddComboBox("ys w200 Disabled Choose1", ["ductaal","lobulair"])
+	typeCis.OnEvent("Change", _CIStypeButton)
 	graderingtekst := MyGUI.AddText("xm+30 section w200 Disabled", "Gradering")
-	graderingCis := MyGUI.AddComboBox("ys w200 Disabled Choose2", ["graad 1","graad 2","graad 3"])
+	graderingCis := MyGUI.AddComboBox("ys w200 Disabled Choose2", ["graad 1", "graad 2", "graad 3"])
 	groeipatroontekst := MyGUI.AddText("xm+30 section w200 Disabled", "Groeipatroon")
 	groeipatroon := MyGUI.AddListBox("ys w200 r7 Multi Disabled Choose1", ["cribriform","solied","papillair","comedo","clinging","pagetoid","uitbreidend in adenosis"])
 	MyGUI.AddText("xm section w200 h20", "Tumorload")
@@ -326,6 +328,29 @@ _CISButton(*){
 	}
 	return
 }
+_CIStypeButton(*){
+	graderingoptiesDCIS := ["graad 1", "graad 2", "graad 3"]
+	graderingoptiesLCIS := ["klassiek", "pleomorf", "floried"]
+	if typeCis.text = "ductaal"
+	{
+		graderingtekst.text := "Gradering"
+		graderingCis.Delete()
+		graderingCis.Add(graderingoptiesDCIS)
+		graderingCis.Choose(1)
+		groeipatroontekst.Enabled := 1
+		groeipatroon.Enabled := 1
+	}
+	if typeCis.text = "lobulair"
+	{
+		graderingtekst.text := "Type"
+		graderingCis.Delete()
+		graderingCis.Add(graderingoptiesLCIS)
+		graderingCis.Choose(1)
+		groeipatroontekst.Enabled := 0
+		groeipatroon.Enabled := 0
+	}
+	
+}
 
 _69pbButtonOK(*){
 	MyGUI.Hide()
@@ -345,8 +370,13 @@ _69pbButtonOK(*){
 	{
 		textCISbesluit := "Eveneens " graderingCis.text " " typeCIS.text " carcinoma in situ."
 		cis := "aanwezig: "
-		komma := "; "
-		groeipatroon := StrJoin(groeipatroon.text, ", ")
+		komma := ""
+		groeipatroontx := ""
+		if groeipatroon.Enabled = 1
+			{
+			komma := "; "
+			groeipatroontx := StrJoin(groeipatroon.text, ", ")
+			}
 		typeCismicro := typeCis.text " carcinoma in situ"
 	}
 	else if CIS.value = 0
@@ -356,7 +386,7 @@ _69pbButtonOK(*){
 		typeCIS := ""
 		graderingCis.text := ""
 		typeCismicro := ""
-		groeipatroon := ""
+		groeipatroontx := ""
 		komma := ""
 		textCISbesluit := ""
 	}
@@ -370,7 +400,7 @@ _69pbButtonOK(*){
 		"-Glandulair: score " glandulair.value "<br>"
 		"-Kernpleiomorfie: score " kern.value "<br>"
 		"-Mitosetelling: score " mitose.value "<br><br>"
-		"In situ carcinoom: " cis " " graderingCis.text " " typeCismicro komma groeipatroon "<br><br>"
+		"In situ carcinoom: " cis " " graderingCis.text " " typeCismicro komma groeipatroontx "<br><br>"
 		tumorloadhtml
 		"Lymfovasculaire invasie: " lvi ".<br>"
 		"Perineurale invasie: " pni ".<br>"
@@ -422,7 +452,7 @@ _69pbButtonOK(*){
 	MyGui.AddText("xm section w100", "Andere letsels")
 	andereLetsels := MyGui.AddEdit("ys w400", "Geen")
 	MyGui.AddText("xm section w100", "TNM")
-	tnm := MyGui.AddEdit("ys w400", "pT1a")
+	tnm := MyGui.AddEdit("ys w400", "pT")
 	MyGui.AddButton("xm w50 h20 default", "OK").OnEvent("click", _88ButtonOK)
 	MyGui.Show()
 
@@ -570,7 +600,7 @@ _PDL1ButtonOK(*)
 	MyGui.AddText("xs section w200", "SV")
 	sv := MyGui.AddComboBox("ys w200 Choose1", ["tumorvrij","positief"])
 	MyGui.AddText("xs section w200", "Budding")
-	budding := MyGui.AddComboBox("ys w200 Choose1", ["afwezig","aanwezig: beperkt","aanwezig: matig","aanwezig:uitgesproken"])
+	budding := MyGui.AddComboBox("ys w200 Choose1", ["afwezig (bd1)","aanwezig: beperkt (bd1)","aanwezig: matig (bd2)","aanwezig:uitgesproken (bd3)"])
 	extramuraleDepositsTekst := MyGui.AddText("xs section w200", "Extramurale deposits")
 	extramuraleDeposits := MyGui.AddComboBox("ys w200 Choose1", ["afwezig","aanwezig"])
 	totaalLkTekst := MyGui.AddText("xs section w200", "Totaal # LK")
